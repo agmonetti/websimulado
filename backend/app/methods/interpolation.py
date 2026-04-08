@@ -61,7 +61,7 @@ class InterpolationService:
             "metodo": "Lagrange",
             "puntos": tabla,
             "polinomio": str(P_expanded),
-            "grado": sp.degree(P_expanded, x_sym)
+            "grado": int(sp.degree(P_expanded, x_sym))
         }
         
         # Si hay x_eval, evaluar

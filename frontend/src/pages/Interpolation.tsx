@@ -98,7 +98,7 @@ export default function Interpolation() {
   const theory = {
     nombre: 'Interpolación de Lagrange',
     descripcion: 'Construye un polinomio de grado n-1 que pasa por n puntos dados.',
-    formula: 'P(x) = \\sum_{i=0}^{n} y_i L_i(x), \\quad L_i(x) = \\prod_{j=0,j \\neq i}^{n} \\frac{x - x_j}{x_i - x_j}',
+    formula: 'P(x) = \\sum_{i=0}^{n} y_i L_i(x), \\quad L_i(x) = \\prod_{\\substack{j=0 \\\\ j \\neq i}}^{n} \\frac{x - x_j}{x_i - x_j}',
     condiciones: 'Exacta en los puntos conocidos. Error en extrapolación puede ser grande fuera del rango.',
     parametros: ['f(x): Función original (opcional)', 'puntos_x: Abscisas de los puntos', 'puntos_y: Ordenadas (o usa f(x))', 'x_eval: Punto para evaluar']
   }

@@ -1,8 +1,8 @@
 """
 Simulacion de Monte Carlo
-- Hit-or-Miss (1D, 2D, 3D)
+- Hit-or-Miss (1D)
 - Valor Promedio (1D, 2D, 3D)
-- Analisis estadistico
+- Analisis estadistico y convergencia
 """
 import numpy as np
 import sympy as sp
@@ -16,13 +16,15 @@ class MonteCarloService:
     def compilar_funcion(texto_funcion: str, variables: str = 'x') -> Callable:
         """Convierte string a funcion vectorizada."""
         try:
-            # Reemplazar notaciones
-            texto_funcion = texto_funcion.replace('e^', 'exp(')
+            # Reemplazar notacion de potencia
             texto_funcion = texto_funcion.replace('^', '**')
             
             vars_list = variables.split()
             syms = [sp.Symbol(v) for v in vars_list]
-            expr = sp.sympify(texto_funcion)
+            
+            # Le pasamos un diccionario local para que reconozca constantes matematicas
+            diccionario_local = {'e': sp.E, 'pi': sp.pi}
+            expr = sp.sympify(texto_funcion, locals=diccionario_local)
             
             if len(syms) == 1:
                 return sp.lambdify(syms[0], expr, 'numpy')
@@ -46,7 +48,7 @@ class MonteCarloService:
         if seed is not None:
             np.random.seed(seed)
         
-        # Evaluar funcion en puntos de prueba
+        # Evaluar funcion en puntos de prueba para hallar limites
         x_test = np.linspace(a, b, 500)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -302,83 +304,4 @@ class MonteCarloService:
             "ic_superior": round(ic_sup, precision),
             "margen_error": round(margen, precision),
             "num_replicas": len(replicas)
-        }
-        
-        x_rand = np.random.uniform(a, b, N)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            f_eval = f(x_rand)
-        
-        promedio = np.mean(f_eval)
-        integral = (b - a) * promedio
-        
-        return {
-            "metodo": "Valor Promedio 1D",
-            "N": N,
-            "a": a, "b": b,
-            "promedio": round(promedio, precision),
-            "integral": round(integral, precision),
-            "integral_formula": f"({b} - {a}) × {round(promedio, precision)} = {round(integral, precision)}"
-        }
-    
-    @staticmethod
-    def analisis_estadistico_1d(f: Callable, a: float, b: float, 
-                                N: int, M: int = 50,
-                                nivel_confianza: float = 0.95,
-                                precision: int = 8) -> Dict:
-        """M simulaciones con análisis estadístico."""
-        
-        x_rand = np.random.uniform(a, b, (M, N))
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            f_eval = f(x_rand)
-        
-        integrales = (b - a) * np.mean(f_eval, axis=1)
-        
-        media = np.mean(integrales)
-        varianza = np.var(integrales, ddof=1)
-        desv_est = np.sqrt(varianza)
-        
-        z = MonteCarloService.z_score(nivel_confianza)
-        intervalo = z * (desv_est / np.sqrt(M))
-        
-        return {
-            "metodo": "Análisis Estadístico 1D",
-            "M": M, "N": N,
-            "a": a, "b": b,
-            "media": round(media, precision),
-            "desv_est": round(desv_est, precision),
-            "nivel_confianza": nivel_confianza,
-            "intervalo_confianza": round(intervalo, precision),
-            "limite_inferior": round(media - intervalo, precision),
-            "limite_superior": round(media + intervalo, precision)
-        }
-    
-    @staticmethod
-    def valor_promedio_2d(f: Callable, xa: float, xb: float, 
-                         ya: float, yb: float, N: int,
-                         seed: int = None, precision: int = 8) -> Dict:
-        """Método del Valor Promedio en 2D."""
-        if seed:
-            np.random.seed(seed)
-        
-        x_rand = np.random.uniform(xa, xb, N)
-        y_rand = np.random.uniform(ya, yb, N)
-        
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            f_eval = f(x_rand, y_rand)
-        
-        promedio = np.mean(f_eval)
-        area = (xb - xa) * (yb - ya)
-        integral = area * promedio
-        
-        return {
-            "metodo": "Valor Promedio 2D",
-            "N": N,
-            "x_limites": [xa, xb],
-            "y_limites": [ya, yb],
-            "area": round(area, precision),
-            "promedio": round(promedio, precision),
-            "integral": round(integral, precision)
         }
