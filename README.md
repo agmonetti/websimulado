@@ -52,48 +52,12 @@ Monte Carlo
 
 ---
 
-## Stack Tecnologico
-
-Backend: FastAPI (Python 3.13) + NumPy + SymPy
-Frontend: React 18 + TypeScript + Vite
-Estado: Zustand
-Graficos: Plotly.js
-
----
-
-## API Endpoints
-
-```
-POST /api/root-finding/bisection
-POST /api/root-finding/fixed-point
-POST /api/root-finding/newton-raphson
-POST /api/root-finding/aitken
-
-POST /api/integration/trapezoidal
-POST /api/integration/midpoint
-POST /api/integration/simpson-13
-POST /api/integration/simpson-38
-
-POST /api/differentiation/finite-differences
-
-POST /api/interpolation/lagrange
-
-POST /api/monte-carlo/hit-or-miss
-POST /api/monte-carlo/average-value
-```
-
-Ver más en: http://localhost:8000/docs
-
----
-
-## 🐛 Troubleshooting
-
-```
-Puerto 8000 ocupado → Cambiar API_PORT en backend/.env
-Módulos faltantes → pip install -r requirements.txt en backend/
-npm error → rm -rf frontend/node_modules && npm install
-```
-
----
-
-**Licencia**: MIT
+## To DO
+- probar metodo a metodo
+- montecarlo: 2d: no muestra resultados completos. falta:
+	* tabla de iteracion (max 1000 valores)
+	* desviacion estandar
+	* IC
+	* integracion estimada
+	* grafico de los puntos
+- cada metodo debe mostrar la funcion que se quiere calcular o utilizar para el metodo, antes de ejecutarlo, para revisar que es la que se quiere trabajar, como funciona la visual de la formula.
