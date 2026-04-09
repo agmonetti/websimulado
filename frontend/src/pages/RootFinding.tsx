@@ -313,10 +313,11 @@ aitken: {
                 />
               )}
 
-              {(result.iteraciones || result.iterations) && (
+{(result.iteraciones || result.iterations) && (
                 <IterationsTable 
                   iterations={result.iteraciones || result.iterations}
                   title="Historial de Iteraciones"
+                  precision={parseInt(input.precision) || 8} // <-- PASAMOS LA VARIABLE ACÁ
                 />
               )}
 

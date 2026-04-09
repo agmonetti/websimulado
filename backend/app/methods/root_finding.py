@@ -52,19 +52,21 @@ class RootFindingService:
                     "convergencia": False, "num_iter": i, "error_msg": f"Divergencia matemática: {str(e)}"
                 }
             
+            # ELIMINAMOS TODOS LOS REDONDEOS ACÁ (Enviamos datos crudos)
+            error_calc = abs(b - a) / 2.0
             iteraciones.append({
                 "i": i + 1,
-                "a": round(a, precision),
-                "b": round(b, precision),
-                "c": round(c, precision),
-                "f_c": round(fc, precision),
-                "error": round(abs(b - a) / 2.0, precision)
+                "a": a,
+                "b": b,
+                "c": c,
+                "f_c": fc,
+                "error": error_calc
             })
             
-            if abs(fc) < tol or (b - a) / 2.0 < tol:
+            if abs(fc) < tol or error_calc < tol:
                 return {
                     "metodo": "Bisección",
-                    "raiz": round(c, precision),
+                    "raiz": round(c, precision), # La respuesta final sí se puede redondear a gusto
                     "iteraciones": iteraciones,
                     "convergencia": True,
                     "num_iter": i + 1
@@ -97,7 +99,6 @@ class RootFindingService:
         for i in range(max_iter):
             try:
                 x_new = float(g(x))
-                # Trampa para evitar que el JSON explote en el backend
                 if math.isnan(x_new) or math.isinf(x_new):
                     raise OverflowError("La iteración explotó hacia el infinito.")
             except Exception as e:
@@ -112,11 +113,12 @@ class RootFindingService:
 
             error = abs(x_new - x)
             
+            # ELIMINAMOS TODOS LOS REDONDEOS ACÁ
             iteraciones.append({
                 "i": i + 1,
-                "x": round(x, precision),
-                "g_x": round(x_new, precision),
-                "error": round(error, precision)
+                "x": x,
+                "g_x": x_new,
+                "error": error
             })
             
             if error < tol:
@@ -175,13 +177,14 @@ class RootFindingService:
                 
             error = abs(x_new - x)
             
+            # ELIMINAMOS TODOS LOS REDONDEOS ACÁ
             iteraciones.append({
                 "i": i + 1,
-                "x": round(x, precision),
-                "f (x)": round(fx, precision),
-                "f ' (x)": round(dfx, precision),
-                "Resultado": round(x_new, precision),
-                "error": round(error, precision)
+                "x": x,
+                "f (x)": fx,
+                "f ' (x)": dfx,
+                "Resultado": x_new,
+                "error": error
             })
             
             if error < tol:
@@ -237,13 +240,14 @@ class RootFindingService:
             
             error = abs(x_acelerado - x)
             
+            # ELIMINAMOS TODOS LOS REDONDEOS ACÁ
             iteraciones.append({
                 "i": i + 1,
-                "x": round(x, precision),
-                "g_x": round(x1, precision),
-                "g_g_x": round(x2, precision),
-                "x_acelerado": round(x_acelerado, precision),
-                "error": round(error, precision)
+                "x": x,
+                "g_x": x1,
+                "g_g_x": x2,
+                "x_acelerado": x_acelerado,
+                "error": error
             })
             
             if error < tol:

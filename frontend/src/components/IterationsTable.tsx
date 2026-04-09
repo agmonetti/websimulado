@@ -1,9 +1,10 @@
 interface IterationsTableProps {
   iterations: any[]
   title?: string
+  precision?: number // <-- AGREGAMOS LA PROPIEDAD
 }
 
-export default function IterationsTable({ iterations, title = "Tabla de Iteraciones" }: IterationsTableProps) {
+export default function IterationsTable({ iterations, title = "Tabla de Iteraciones", precision = 8 }: IterationsTableProps) {
   if (!iterations || iterations.length === 0) {
     return <div>No hay iteraciones para mostrar</div>
   }
@@ -44,8 +45,10 @@ export default function IterationsTable({ iterations, title = "Tabla de Iteracio
                 }}>
                   {typeof row[header] === 'number' 
                     ? header === 'i' 
-                      ? Math.round(row[header])
-                      : row[header].toFixed(6)
+                      ? Math.round(row[header]) // Iteración va entera
+                      : header.toLowerCase() === 'error'
+                        ? row[header].toExponential(precision) // Error en científica para ver detalles diminutos
+                        : row[header].toFixed(precision) // Resto de números con precisión fija al estilo Excel
                     : row[header]}
                 </td>
               ))}
