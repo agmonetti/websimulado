@@ -95,3 +95,32 @@ def aitken(req: RootFindingRequest):
         return resultado
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/comparar")
+def comparar_raices(req: RootFindingRequest):
+    """Endpoint para el comparador de búsqueda de raíces"""
+    try:
+        # Validaciones básicas
+        if not req.func_str or not req.g_str:
+            raise ValueError("Se requiere f(x) y g(x) para comparar todos los métodos.")
+        if req.a is None or req.b is None or req.x0 is None:
+            raise ValueError("Se requieren los parámetros a, b y x0.")
+            
+        tol = req.tol or 1e-6
+        max_iter = req.max_iter or 100
+        precision = req.precision or 8
+        
+        resultado = RootFindingService.comparar_metodos(
+            func_str=req.func_str,
+            g_str=req.g_str,
+            a=req.a,
+            b=req.b,
+            x0=req.x0,
+            tol=tol,
+            max_iter=max_iter,
+            precision=precision
+        )
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

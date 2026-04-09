@@ -269,3 +269,50 @@ class RootFindingService:
             "num_iter": max_iter,
             "error_msg": "No converge."
         }
+    @staticmethod
+    def comparar_metodos(func_str: str, g_str: str, a: float, b: float, x0: float, 
+                         tol: float = 1e-6, max_iter: int = 100, precision: int = 8) -> Dict:
+        """
+        Orquestador que ejecuta los 4 métodos en paralelo y devuelve un resumen comparativo.
+        """
+        resultados = {
+            "biseccion": None,
+            "punto_fijo": None,
+            "newton_raphson": None,
+            "aitken": None
+        }
+
+        # 1. Bisección
+        try:
+            f_bisec = RootFindingService.compilar_funcion(func_str)
+            resultados["biseccion"] = RootFindingService.biseccion(f_bisec, a, b, tol, max_iter, precision)
+        except Exception as e:
+            resultados["biseccion"] = {"convergencia": False, "error_msg": str(e), "iteraciones": []}
+
+        # 2. Punto Fijo
+        try:
+            g_pf = RootFindingService.compilar_funcion(g_str)
+            resultados["punto_fijo"] = RootFindingService.punto_fijo(g_pf, x0, tol, max_iter, precision)
+        except Exception as e:
+            resultados["punto_fijo"] = {"convergencia": False, "error_msg": str(e), "iteraciones": []}
+
+        # 3. Newton-Raphson
+        try:
+            f_nr = RootFindingService.compilar_funcion(func_str)
+            resultados["newton_raphson"] = RootFindingService.newton_raphson(f_nr, x0, tol, max_iter, precision)
+        except Exception as e:
+            resultados["newton_raphson"] = {"convergencia": False, "error_msg": str(e), "iteraciones": []}
+
+        # 4. Aitken
+        try:
+            g_aitken = RootFindingService.compilar_funcion(g_str)
+            resultados["aitken"] = RootFindingService.aitken(g_aitken, x0, tol, max_iter, precision)
+        except Exception as e:
+            resultados["aitken"] = {"convergencia": False, "error_msg": str(e), "iteraciones": []}
+
+        return {
+            "parametros": {
+                "f(x)": func_str, "g(x)": g_str, "a": a, "b": b, "x0": x0, "tol": tol
+            },
+            "comparativa": resultados
+        }

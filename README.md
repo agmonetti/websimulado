@@ -53,8 +53,10 @@ Monte Carlo
 ---
 
 ## To DO
-1- dejar diferencias finitas funcional al 100%.
-2- tratar la 'tolerancia' y 'precision' de las tablas iterativas.
-3- metodos comparativos.
-5- teclado matematico.
-4- montecarlo.
+1- ~dejar diferencias finitas funcional al 100%.~
+2- ~tratar la 'tolerancia' y 'precision' de las tablas iterativas.~
+3- ~metodos comparativos.~
+4- teclado matematico.
+5- mostrar en el mismo modo 'formula' que mostramos la formula de teoria de cada metodo, la funcion, ya sea f(x) o g(x) para corroborar que la estamos tipeando correctamente, es decir, es la misma que la planteada en el ejercicio. mostrarla justo debajo de dicha funcion.
+7- mejorar la visual de la barra izquierda lateral, esta muy fea.
+6- montecarlo.

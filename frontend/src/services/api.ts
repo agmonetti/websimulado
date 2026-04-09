@@ -14,6 +14,7 @@ export const rootFindingService = {
   puntoFijo: (data: any) => api.post('/root-finding/punto-fijo', data),
   newtonRaphson: (data: any) => api.post('/root-finding/newton-raphson', data),
   aitken: (data: any) => api.post('/root-finding/aitken', data),
+  comparar: (data: any) => axios.post('/api/root-finding/comparar', data),
 }
 
 export const differentiationService = {
@@ -25,6 +26,7 @@ export const integrationService = {
   rectangulo: (data: any) => api.post('/integration/rectangulo', data),
   simpson13: (data: any) => api.post('/integration/simpson-13', data),
   simpson38: (data: any) => api.post('/integration/simpson-38', data),
+  comparar: (data: any) => axios.post('/api/integration/comparar', data)
 }
 
 export const interpolationService = {

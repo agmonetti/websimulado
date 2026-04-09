@@ -81,3 +81,27 @@ def simpson_38_compuesto(req: IntegrationRequest):
         return resultado
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/comparar")
+def comparar_integraciones(req: IntegrationRequest):
+    """Endpoint para el comparador de integraciones numéricas"""
+    try:
+        if not req.func_str or req.a is None or req.b is None or req.n is None:
+            raise ValueError("Faltan parámetros: func_str, a, b, n")
+            
+        precision = req.precision or 8
+        resultado = IntegrationService.comparar_metodos(
+            func_str=req.func_str,
+            a=req.a,
+            b=req.b,
+            n=req.n,
+            precision=precision
+        )
+        
+        if "error_global" in resultado:
+            raise ValueError(resultado["error_global"])
+            
+        return resultado
+    except Exception as e:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail=str(e))

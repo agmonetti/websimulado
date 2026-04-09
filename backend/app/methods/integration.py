@@ -272,3 +272,52 @@ class IntegrationService:
             "integral": round(float(integral), precision), "cota_error": cota_error,
             "tabla": tabla, "desarrollo": desarrollo, "notas": notas_unicas
         }
+    @staticmethod
+    def comparar_metodos(func_str: str, a: float, b: float, n: int, precision: int = 8) -> Dict:
+        """
+        Orquestador que ejecuta los 4 métodos de integración y devuelve un resumen comparativo.
+        """
+        resultados = {
+            "rectangulo": None,
+            "trapecio": None,
+            "simpson_13": None,
+            "simpson_38": None
+        }
+
+        try:
+            f = IntegrationService.compilar_funcion(func_str)
+        except Exception as e:
+            return {"error_global": str(e)}
+
+        # 1. Rectángulo Medio Compuesto
+        try:
+            resultados["rectangulo"] = IntegrationService.rectangulo_compuesto(f, a, b, n, precision)
+            resultados["rectangulo"]["exito"] = True
+        except Exception as e:
+            resultados["rectangulo"] = {"exito": False, "error_msg": str(e)}
+
+        # 2. Trapecio Compuesto
+        try:
+            resultados["trapecio"] = IntegrationService.trapecio_compuesto(f, a, b, n, precision)
+            resultados["trapecio"]["exito"] = True
+        except Exception as e:
+            resultados["trapecio"] = {"exito": False, "error_msg": str(e)}
+
+        # 3. Simpson 1/3 Compuesto
+        try:
+            resultados["simpson_13"] = IntegrationService.simpson_13_compuesto(f, a, b, n, precision)
+            resultados["simpson_13"]["exito"] = True
+        except Exception as e:
+            resultados["simpson_13"] = {"exito": False, "error_msg": str(e)}
+
+        # 4. Simpson 3/8 Compuesto
+        try:
+            resultados["simpson_38"] = IntegrationService.simpson_38_compuesto(f, a, b, n, precision)
+            resultados["simpson_38"]["exito"] = True
+        except Exception as e:
+            resultados["simpson_38"] = {"exito": False, "error_msg": str(e)}
+
+        return {
+            "parametros": {"f(x)": func_str, "a": a, "b": b, "n": n},
+            "comparativa": resultados
+        }
