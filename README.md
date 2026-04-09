@@ -63,5 +63,8 @@ Monte Carlo
 	* grafico de los puntos
 - cada metodo debe mostrar la funcion que se quiere calcular o utilizar para el metodo, antes de ejecutarlo, para revisar que es la que se quiere trabajar, como funciona la visual de la formula.
 - agregar el boton de insercion de teclado matematico
--Algo que detecte, es el los printeos de las tablas, no respetan el parametro de 'precision', quieor que lo hagan, ademas, estan respetando el parametro de 'tolerancia?
-- dejar explicito los 3 casos de lagrange.
+- Algo que detecte, es el los printeos de las tablas, no respetan el parametro de 'precision', quieor que lo hagan, ademas, estan respetando el parametro de 'tolerancia?
+- agregar comparaciones entre metodos:
+	* bnap
+	* integraciones numericas (1-3 compuesto, rectangulo comp, trapecio comp)
+	
