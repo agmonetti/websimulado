@@ -1,12 +1,15 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+// En Docker: nginx hace proxy_pass a http://backend:8000
+// En local: axios hace requests a http://localhost:8000
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 60000 // Timeout para cálculos numéricos largos
 })
 
 export const rootFindingService = {
