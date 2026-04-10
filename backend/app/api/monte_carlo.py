@@ -31,7 +31,7 @@ class MonteCarloRequest(BaseModel):
 def hit_or_miss_1d(req: MonteCarloRequest):
     try:
         f = MonteCarloService.compilar_funcion(req.func_str, 'x')
-        return MonteCarloService.hit_or_miss_1d(f, req.a, req.b, req.N, req.seed, req.precision or 8)
+        return MonteCarloService.hit_or_miss_1d(f, req.a, req.b, req.N, req.seed, req.precision or 8, req.nivel_confianza or 0.95)
     except Exception as e: raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/valor-promedio-1d")

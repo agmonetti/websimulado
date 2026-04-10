@@ -120,23 +120,22 @@ const handleClear = () => {
     }
   }
 
+  const createJsFunc = (funcStr: string) => {
+    let jsFuncStr = funcStr.toLowerCase()
+      .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
+      .replace(/-([a-zA-Z0-9_.]+)\*\*/g, '-($1)**')
+      .replace(/\b(sin|cos|tan|asin|acos|atan|exp|log|sqrt|abs)\(/g, 'Math.$1(')
+      .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
+    return new Function('x', `return ${jsFuncStr}`);
+  }
+
   const generateIntegralPlot = () => {
     try {
       const a_val = parseMathExpr(input.a)
       const b_val = parseMathExpr(input.b)
       if (isNaN(a_val) || isNaN(b_val)) return [];
 
-      const jsFuncStr = input.func_str.replace(/sen/gi, 'sin')
-        .replace(/\^/g, '**')
-        .replace(/\bsin\(/g, 'Math.sin(')
-        .replace(/\bcos\(/g, 'Math.cos(')
-        .replace(/\bexp\(/g, 'Math.exp(')
-        .replace(/\blog\(/g, 'Math.log(')
-        .replace(/\bsqrt\(/g, 'Math.sqrt(')
-        .replace(/\bpi\b/g, 'Math.PI')
-        .replace(/\be\b/g, 'Math.E');
-
-      const func = new Function('x', `return ${jsFuncStr}`)
+      const func = createJsFunc(input.func_str)
 
       // Lógica de márgenes
       const range = b_val - a_val;

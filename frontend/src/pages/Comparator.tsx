@@ -99,10 +99,10 @@ const formatToLatex = (str: string) => {
 
   const createJsFunc = (funcStr: string) => {
     let jsFuncStr = funcStr.toLowerCase()
-        .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
-        .replace(/\bsin\(/g, 'Math.sin(').replace(/\bcos\(/g, 'Math.cos(').replace(/\btan\(/g, 'Math.tan(')
-        .replace(/\blog\(/g, 'Math.log(').replace(/\bexp\(/g, 'Math.exp(').replace(/\bsqrt\(/g, 'Math.sqrt(')
-        .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
+      .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
+      .replace(/-([a-zA-Z0-9_.]+)\*\*/g, '-($1)**')
+      .replace(/\b(sin|cos|tan|asin|acos|atan|exp|log|sqrt|abs)\(/g, 'Math.$1(')
+      .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
     return new Function('x', `return ${jsFuncStr}`);
   }
 

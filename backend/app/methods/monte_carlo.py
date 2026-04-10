@@ -36,14 +36,16 @@ class MonteCarloService:
             raise ValueError(f"Error compilando funcion: {str(e)}")
 
     @staticmethod
-    def hit_or_miss_1d(f, a: float, b: float, N: int, seed: int = None, precision: int = 8) -> Dict:
+    def hit_or_miss_1d(f, a: float, b: float, N: int, seed: int = None, precision: int = 8, nivel_confianza: float = 0.95) -> Dict:
         MonteCarloService.aplicar_semilla(seed)
-        x_test = np.linspace(a, b, 1000)
+        
+        # Le pedimos a Python que calcule los puntos de la línea para el gráfico
+        x_test = np.linspace(a, b, 200)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            y_eval = np.nan_to_num(f(x_test), nan=0.0)
+            y_test = np.nan_to_num(f(x_test), nan=0.0)
             
-        y_min, y_max = np.min(y_eval), np.max(y_eval)
+        y_min, y_max = float(np.min(y_test)), float(np.max(y_test))
         y_base = min(0, y_min) * 1.1 if min(0, y_min) < 0 else 0
         y_techo = max(0, y_max) * 1.1
         
@@ -57,31 +59,47 @@ class MonteCarloService:
         exitos_pos = (y_rand > 0) & (y_rand <= f_eval)
         exitos_neg = (y_rand < 0) & (y_rand >= f_eval)
         exitos_totales = exitos_pos | exitos_neg
-        n_exitos = np.sum(exitos_totales)
+        n_exitos = int(np.sum(exitos_totales))
         
         area_caja = (b - a) * (y_techo - y_base)
-        integral_aprox = area_caja * (n_exitos / N) 
+        p_exito = n_exitos / N
+        integral_aprox = area_caja * p_exito 
         if np.sum(exitos_neg) > np.sum(exitos_pos):
             integral_aprox = -integral_aprox
 
-        # Capeo para la tabla web (max 2000)
+        # Cálculo Estadístico para Hit-or-Miss (Distribución Binomial)
+        desv_std = np.sqrt(p_exito * (1 - p_exito)) if N > 1 else 0
+        error_est = desv_std / np.sqrt(N) if N > 0 else 0
+        
+        z_score = MonteCarloService.calcular_z_score(nivel_confianza)
+        ic_inf = integral_aprox - z_score * error_est * area_caja
+        ic_sup = integral_aprox + z_score * error_est * area_caja
+
+        # Capeamos a 2000 y ponemos los tildes
         limite = min(N, 2000)
         historial = [
             {"i": i+1, "x": round(float(x_rand[i]), precision), "y_rand": round(float(y_rand[i]), precision), 
              "f_x": round(float(f_eval[i]), precision), "exito": "✓" if exitos_totales[i] else "✗"} 
             for i in range(limite)
         ]
-
+        
         return {
             "metodo": "Hit-or-Miss 1D",
             "integral": round(float(integral_aprox), precision),
             "N": N,
             "area_caja": round(float(area_caja), precision),
-            "n_exitos": int(n_exitos),
+            "n_exitos": n_exitos,
+            "escala": round(float(area_caja), precision),
+            "desv_estandar": round(float(desv_std), precision),
+            "error_std": round(float(error_est), precision),
+            "z_score": round(float(z_score), 4),
+            "ic_inf": round(float(ic_inf), precision),
+            "ic_sup": round(float(ic_sup), precision),
             "historial": historial,
+            "x_line": [round(float(x), precision) for x in x_test], # Línea para el frontend
+            "y_line": [round(float(y), precision) for y in y_test],
             "grafico_limites": {"y_base": float(y_base), "y_techo": float(y_techo)}
         }
-
 
 
     @staticmethod

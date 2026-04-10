@@ -110,6 +110,15 @@ export default function Interpolation() {
     }
   }
 
+  const createJsFunc = (funcStr: string) => {
+    let jsFuncStr = funcStr.toLowerCase()
+      .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
+      .replace(/-([a-zA-Z0-9_.]+)\*\*/g, '-($1)**')
+      .replace(/\b(sin|cos|tan|asin|acos|atan|exp|log|sqrt|abs)\(/g, 'Math.$1(')
+      .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
+    return new Function('x', `return ${jsFuncStr}`);
+  }
+
   const generateInterpolationPlot = () => {
     try {
       const puntos_x = input.puntos_x.split(',').map(x => parseMathExpr(x.trim()))
@@ -126,18 +135,7 @@ export default function Interpolation() {
       const plotData: any[] = []
 
       if (modo === 'caso1') {
-        const jsFuncStr = input.func_str
-          .replace(/sen/gi, 'sin') // Limpiar 'sen'
-          .replace(/\^/g, '**')
-          .replace(/\bsin\(/g, 'Math.sin(')
-          .replace(/\bcos\(/g, 'Math.cos(')
-          .replace(/\bexp\(/g, 'Math.exp(')
-          .replace(/\blog\(/g, 'Math.log(')
-          .replace(/\bsqrt\(/g, 'Math.sqrt(')
-          .replace(/\bpi\b/g, 'Math.PI')
-          .replace(/\be\b/g, 'Math.E');
-
-        const func = new Function('x', `return ${jsFuncStr}`)
+        const func = createJsFunc(input.func_str)
         
         const y_func = x_plot.map(xi => { try { return func(xi) } catch { return NaN } })
         const puntos_y = puntos_x.map(xi => { try { return func(xi) } catch { return NaN } })

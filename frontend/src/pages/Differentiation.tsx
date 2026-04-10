@@ -111,29 +111,21 @@ const handleClear = () => {
     }
   }
 
+  const createJsFunc = (funcStr: string) => {
+    let jsFuncStr = funcStr.toLowerCase()
+      .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
+      .replace(/-([a-zA-Z0-9_.]+)\*\*/g, '-($1)**')
+      .replace(/\b(sin|cos|tan|asin|acos|atan|exp|log|sqrt|abs)\(/g, 'Math.$1(')
+      .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
+    return new Function('x', `return ${jsFuncStr}`);
+  }
+
 const generateDerivativePlot = () => {
     try {
       const x_val = parseMathExpr(input.x_val)
       if (isNaN(x_val)) return [];
 
-      // 1. Normalizamos la función cruda (pasamos sen->sin y ln->log)
-      let jsFuncStr = input.func_str.toLowerCase()
-        .replace(/sen\(/g, 'sin(')
-        .replace(/ln\(/g, 'log(')
-        .replace(/\^/g, '**');
-
-      // 2. Ahora sí, le agregamos el prefijo 'Math.' a todas de una sola vez sin pisarnos
-      jsFuncStr = jsFuncStr
-        .replace(/\bsin\(/g, 'Math.sin(')
-        .replace(/\bcos\(/g, 'Math.cos(')
-        .replace(/\btan\(/g, 'Math.tan(')
-        .replace(/\blog\(/g, 'Math.log(')
-        .replace(/\bexp\(/g, 'Math.exp(')
-        .replace(/\bsqrt\(/g, 'Math.sqrt(')
-        .replace(/\bpi\b/g, 'Math.PI')
-        .replace(/\be\b/g, 'Math.E');
-
-      const func = new Function('x', `return ${jsFuncStr}`)
+      const func = createJsFunc(input.func_str)
 
       const range = 2
       const x = Array.from({ length: 200 }, (_, i) => x_val - range + (i / 200) * (2 * range))

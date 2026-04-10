@@ -11,7 +11,7 @@ export default function MonteCarlo() {
   const [method, setMethod] = useState('hit-or-miss-1d')
   
   const [input, setInput] = useState({
-    func_str: 'exp(x)',
+    func_str: 'exp(-x**2)',
     a: '0', b: '2',
     ya: '0', yb: '2',
     za: '0', zb: '1',
@@ -19,7 +19,7 @@ export default function MonteCarlo() {
     seed: '',
     M: '50',
     nivel_confianza: '0.95',
-    max_error: '', // Ahora empieza vacío para ser opcional
+    max_error: '', 
     factor_j: '',     
     precision: '6'
   })
@@ -33,13 +33,22 @@ export default function MonteCarlo() {
     setDimension(dim)
     setResult(null)
     setActiveKeyboard(null)
-    if (dim === '1d') { setMethod('hit-or-miss-1d'); setInput({...input, func_str: 'exp(x)'}); }
+    if (dim === '1d') { setMethod('hit-or-miss-1d'); setInput({...input, func_str: 'exp(-x**2)'}); }
     if (dim === '2d') { setMethod('valor-promedio-2d'); setInput({...input, func_str: 'exp(x+y)', a: '0', b: '2', ya: '1', yb: '3'}); }
     if (dim === '3d') { setMethod('valor-promedio-3d'); setInput({...input, func_str: 'exp(x+y+z)', a: '0', b: '1', ya: '0', yb: '1', za: '0', zb: '1'}); }
     if (dim === 'estadistico') { setMethod('estadistico-1d'); setInput({...input, func_str: 'sin(x)', a: '0', b: '3.14159'}); }
   }
 
   const handleInsert = (text: string) => setInput({ ...input, func_str: input.func_str + text });
+
+  const createJsFunc = (funcStr: string) => {
+    let jsFuncStr = funcStr.toLowerCase()
+      .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
+      .replace(/-([a-zA-Z0-9_.]+)\*\*/g, '-($1)**')
+      .replace(/\b(sin|cos|tan|asin|acos|atan|exp|log|sqrt|abs)\(/g, 'Math.$1(')
+      .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
+    return new Function('x', `return ${jsFuncStr}`);
+  }
 
   const formatToLatex = (str: string) => {
     if (!str) return '';
@@ -63,7 +72,7 @@ export default function MonteCarlo() {
       const basePayload = {
         func_str: input.func_str, a: parseFloat(input.a), b: parseFloat(input.b),
         N: parseInt(input.N), seed: input.seed !== '' ? parseInt(input.seed) : undefined,
-        precision: parseInt(input.precision), nivel_confianza: parseFloat(input.nivel_confianza) // Lo mandamos en todas
+        precision: parseInt(input.precision), nivel_confianza: parseFloat(input.nivel_confianza) 
       }
 
       switch(method) {
@@ -83,22 +92,10 @@ export default function MonteCarlo() {
     }
   }
 
-// SÚPER TRADUCTOR JS PARA EL GRÁFICO
-  const createJsFunc = (funcStr: string) => {
-    let jsFuncStr = funcStr.toLowerCase()
-        .replace(/sen\(/g, 'sin(').replace(/ln\(/g, 'log(').replace(/\^/g, '**')
-        .replace(/\bsin\(/g, 'Math.sin(').replace(/\bcos\(/g, 'Math.cos(').replace(/\btan\(/g, 'Math.tan(')
-        .replace(/\blog\(/g, 'Math.log(').replace(/\bexp\(/g, 'Math.exp(').replace(/\bsqrt\(/g, 'Math.sqrt(')
-        .replace(/\bpi\b/g, 'Math.PI').replace(/\be\b/g, 'Math.E');
-    return new Function('x', 'y', 'z', `return ${jsFuncStr}`);
-  }
-
   const generateMonteCarloPlot = () => {
     if (!result) return [];
     try {
       const data: any[] = [];
-      const funcJS = createJsFunc(input.func_str);
-
       if (method === 'hit-or-miss-1d' && result.historial) {
         const x_exito: number[] = []; const y_exito: number[] = [];
         const x_fallo: number[] = []; const y_fallo: number[] = [];
@@ -107,36 +104,32 @@ export default function MonteCarlo() {
           else { x_fallo.push(pt.x); y_fallo.push(pt.y_rand); }
         });
         
-        const a = parseFloat(input.a); const b = parseFloat(input.b);
-        const x_line = Array.from({length: 100}, (_, i) => a + (i/100)*(b-a));
-        const y_line = x_line.map(xi => funcJS(xi));
-
         data.push({ x: x_exito, y: y_exito, type: 'scatter', mode: 'markers', name: 'Éxitos', marker: { color: 'green', size: 4, opacity: 0.6 } });
         data.push({ x: x_fallo, y: y_fallo, type: 'scatter', mode: 'markers', name: 'Fallos', marker: { color: 'red', size: 4, opacity: 0.6 } });
-        data.push({ x: x_line, y: y_line, type: 'scatter', mode: 'lines', name: 'f(x)', line: { color: 'blue', width: 2 } });
+        
+        // Ahora usamos los puntos exactos que nos manda Python! Chau error de JS.
+        if (result.x_line && result.y_line) {
+          data.push({ x: result.x_line, y: result.y_line, type: 'scatter', mode: 'lines', name: 'f(x)', line: { color: 'blue', width: 2 } });
+        }
       }
-      
       else if (method === 'valor-promedio-1d' && result.historial) {
         const x_pts = result.historial.map((pt:any) => pt.x);
         const y_pts = result.historial.map((pt:any) => pt.f_x);
         data.push({ x: x_pts, y: y_pts, type: 'scatter', mode: 'markers', name: 'f(x_i)', marker: { color: 'orange', size: 4, opacity: 0.5 } });
         data.push({ x: [parseFloat(input.a), parseFloat(input.b)], y: [result.promedio_fx, result.promedio_fx], type: 'scatter', mode: 'lines', name: 'Media f(x)', line: { color: 'purple', width: 3, dash: 'dash' } });
       }
-      
       else if (method === 'convergencia-1d' && result.historial_convergencia) {
         const ns = result.historial_convergencia.map((pt:any) => pt.N);
         const ints = result.historial_convergencia.map((pt:any) => pt.integral);
         data.push({ x: ns, y: ints, type: 'scatter', mode: 'lines', name: 'Aprox. MC', line: { color: 'blue' } });
         data.push({ x: [ns[0], ns[ns.length-1]], y: [result.valor_exacto_gauss, result.valor_exacto_gauss], type: 'scatter', mode: 'lines', name: 'Exacto (Gauss)', line: { color: 'red', width: 2, dash: 'dash' } });
       }
-
       else if (method === 'valor-promedio-2d' && result.historial) {
         const x_pts = result.historial.map((pt:any) => pt.x);
         const y_pts = result.historial.map((pt:any) => pt.y);
         const z_pts = result.historial.map((pt:any) => pt.f_xy);
         data.push({ x: x_pts, y: y_pts, type: 'scatter', mode: 'markers', marker: { color: z_pts, colorscale: 'Viridis', showscale: true, size: 5, opacity: 0.8 }, name: 'Muestras 2D' });
       }
-
       else if (method === 'valor-promedio-3d' && result.historial) {
         const x_pts = result.historial.map((pt:any) => pt.x);
         const y_pts = result.historial.map((pt:any) => pt.y);
@@ -144,33 +137,15 @@ export default function MonteCarlo() {
         const val_pts = result.historial.map((pt:any) => pt.f_xyz);
         data.push({ x: x_pts, y: y_pts, z: z_pts, type: 'scatter3d', mode: 'markers', marker: { color: val_pts, colorscale: 'Plasma', showscale: true, size: 3, opacity: 0.8 }, name: 'Volumen 3D' });
       }
-
       else if (method === 'estadistico-1d' && result.distribucion) {
         data.push({ x: result.distribucion, type: 'histogram', name: 'Frecuencia', marker: { color: 'skyblue', line: {color: 'black', width: 1} } });
       }
-
       return data;
     } catch { return []; }
   }
 
   const renderPizarra = () => {
     if (!result) return null;
-
-    // PIZARRA PARA HIT-OR-MISS
-    if (method === 'hit-or-miss-1d') {
-      return (
-        <div style={{ backgroundColor: '#1e1e1e', color: '#00ff00', padding: '15px', fontFamily: 'monospace', borderRadius: '6px', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
-{`╔═══════════════════════════════════╗
-║    RESULTADOS HIT-OR-MISS 1D      ║
-╚═══════════════════════════════════╝
-Dardos Totales (N) = ${result.N}
-Aciertos           = ${result.n_exitos}
-Área de la Caja    = ${result.area_caja}
-
-Î (Integral)       = ${result.integral}`}
-        </div>
-      );
-    }
 
     let analisis_j = "";
     if (input.factor_j.trim() !== "") {
@@ -181,7 +156,7 @@ Aciertos           = ${result.n_exitos}
         }
     }
 
-    if (method !== 'hit-or-miss-1d' && method !== 'convergencia-1d') {
+    if (method !== 'convergencia-1d') {
       const z_score = result.z_score || 0;
       const error_std = result.error_std || 0;
       const escala = result.escala || 1; 
@@ -196,6 +171,7 @@ Aciertos           = ${result.n_exitos}
       }
 
       let encabezado_escala = `Muestras por Réplica (N) = ${result.N}\nTotal de Réplicas (M) = ${result.M}\n`;
+      if (method === 'hit-or-miss-1d') encabezado_escala = `Área de la Caja = ${result.area_caja}\nAciertos = ${result.n_exitos}\nDardos (N) = ${result.N}\n`;
       if (method === 'valor-promedio-1d') encabezado_escala = `Escala (Largo) = ${result.escala}\n`;
       if (method === 'valor-promedio-2d') encabezado_escala = `Escala (Área) = ${result.escala}\n`;
       if (method === 'valor-promedio-3d') encabezado_escala = `Escala (Volumen) = ${result.escala}\n`;
@@ -205,7 +181,8 @@ Aciertos           = ${result.n_exitos}
 {`╔═══════════════════════════════════╗
 ║    RESULTADOS ESTADÍSTICOS MC     ║
 ╚═══════════════════════════════════╝
-${encabezado_escala}Î (Integral)  = ${result.integral}
+${encabezado_escala}
+Î (Integral)  = ${result.integral}
 G (Desv. Std) = ${result.desv_estandar}
 EE (Err. Std) = ${result.error_std}
 Z(α/2)        = ${result.z_score}
@@ -222,6 +199,7 @@ ${validacion_texto}${analisis_j}`}
     }
     return null;
   }
+
   const variables_f = dimension === '2d' ? 'x,y' : dimension === '3d' ? 'x,y,z' : 'x';
 
   // FÓRMULAS EXACTAS DE LAS IMÁGENES
@@ -319,7 +297,7 @@ ${validacion_texto}${analisis_j}`}
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div className="form-group"><label>Muestras (n):</label><input type="number" min="100" step="100" value={input.N} onChange={(e) => setInput({...input, N: e.target.value})} /></div>
+              <div className="form-group"><label>Muestras (N):</label><input type="number" min="100" step="100" value={input.N} onChange={(e) => setInput({...input, N: e.target.value})} /></div>
               <div className="form-group"><label>Seed (Opcional):</label><input type="number" value={input.seed} onChange={(e) => setInput({...input, seed: e.target.value})} placeholder="Ej: 42"/></div>
             </div>
 
@@ -329,8 +307,7 @@ ${validacion_texto}${analisis_j}`}
               </div>
             )}
 
-            {/* SECCIÓN DE ESTADÍSTICA OPCIONAL UNIFICADA PARA TODOS LOS MÉTODOS */}
-            {method !== 'hit-or-miss-1d' && method !== 'convergencia-1d' && (
+            {method !== 'convergencia-1d' && (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', padding: '10px', backgroundColor: '#e6ffe6', border: '1px solid #008000', borderRadius: '4px', marginTop: '10px' }}>
                  <div className="form-group" style={{margin: 0}}><label>Confianza (ej: 0.95):</label><input type="number" step="0.01" min="0.5" max="0.99" value={input.nivel_confianza} onChange={(e) => setInput({...input, nivel_confianza: e.target.value})} /></div>
                  <div className="form-group" style={{margin: 0}}><label>Err. Máx (Opcional):</label><input type="number" step="0.01" value={input.max_error} onChange={(e) => setInput({...input, max_error: e.target.value})} /></div>
@@ -368,7 +345,6 @@ ${validacion_texto}${analisis_j}`}
               {result.historial && method !== 'convergencia-1d' && method !== 'estadistico-1d' && (
                 <div style={{ marginTop: '20px' }}>
                   <h3 style={{ margin: '0 0 10px 0', color: '#000080' }}>--- Detalle de Muestras (Max 2000) ---</h3>
-                  {/* AQUÍ ESTÁ EL RECUADRO CON SCROLL PARA QUE NO HAGA LA PÁGINA INFINITA */}
                   <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #ccc' }}>
                     <IterationsTable iterations={result.historial} precision={parseInt(input.precision)} />
                   </div>
