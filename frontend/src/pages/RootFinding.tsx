@@ -10,7 +10,7 @@ export default function RootFinding() {
   const [method, setMethod] = useState('biseccion')
   const [input, setInput] = useState({
     func_str: 'exp(x) - x**2 + 3*x - 2',
-    g_str: 'x - (exp(x) - x**2 + 3*x - 2) / (exp(x) - 2*x + 3)', // Ejemplo de Newton como punto fijo
+    g_str: 'x - (exp(x) - x**2 + 3*x - 2) / (exp(x) - 2*x + 3)', 
     a: '0',
     b: '1',
     x0: '1',
@@ -22,11 +22,11 @@ export default function RootFinding() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [showKeyboard, setShowKeyboard] = useState(false)
+  
+  // ¡ACÁ ESTABA EL ERROR! Reemplazamos showKeyboard por activeKeyboard
+  const [activeKeyboard, setActiveKeyboard] = useState<string | null>(null)
 
-  // Funciones para el Teclado Matemático
   const handleInsert = (text: string) => {
-    // Si el método usa g(x), insertamos ahí, sino en func_str
     if (method === 'punto-fijo' || method === 'aitken') {
       setInput({ ...input, g_str: input.g_str + text });
     } else {
@@ -41,6 +41,24 @@ export default function RootFinding() {
       setInput({ ...input, func_str: '' });
     }
   };
+
+  const formatToLatex = (str: string) => {
+    if (!str) return '';
+    let latex = str.toLowerCase();
+    latex = latex.replace(/\*\*/g, '^'); 
+    latex = latex.replace(/\*/g, ' \\cdot '); 
+    latex = latex.replace(/exp\(([^)]+)\)/g, 'e^{$1}'); 
+    latex = latex.replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}'); 
+    latex = latex.replace(/\bpi\b/g, '\\pi');
+    latex = latex.replace(/\be\b/g, 'e');
+    latex = latex.replace(/sen\(/g, '\\sin(');
+    latex = latex.replace(/sin\(/g, '\\sin(');
+    latex = latex.replace(/cos\(/g, '\\cos(');
+    latex = latex.replace(/tan\(/g, '\\tan(');
+    latex = latex.replace(/log\(/g, '\\ln(');
+    latex = latex.replace(/ln\(/g, '\\ln(');
+    return latex;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -172,7 +190,8 @@ export default function RootFinding() {
           <h2>Parametros</h2>
           <div className="method-selector">
             <label>Metodo:</label>
-            <select value={method} onChange={(e) => { setMethod(e.target.value); setResult(null); setShowKeyboard(false); }}>
+            {/* También ajustamos acá para que use setActiveKeyboard(null) */}
+            <select value={method} onChange={(e) => { setMethod(e.target.value); setResult(null); setActiveKeyboard(null); }}>
               <option value="biseccion">Biseccion</option>
               <option value="punto-fijo">Punto Fijo</option>
               <option value="newton-raphson">Newton-Raphson</option>
@@ -185,12 +204,19 @@ export default function RootFinding() {
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <label>g(x) [Función Iterada]:</label>
-                    <button type="button" onClick={() => setShowKeyboard(!showKeyboard)} className="btn-keyboard-toggle">
-                        {showKeyboard ? '✖ Cerrar' : '⌨ Teclado'}
+                    <button type="button" onClick={() => setActiveKeyboard(activeKeyboard === 'g' ? null : 'g')} className="btn-keyboard-toggle" style={{fontSize: '11px', padding: '2px 8px', cursor:'pointer', borderRadius:'4px', border:'1px solid #ccc'}}>
+                        {activeKeyboard === 'g' ? '✖ Cerrar' : '⌨ Teclado'}
                     </button>
                 </div>
                 <input type="text" value={input.g_str} onChange={(e) => setInput({...input, g_str: e.target.value})} />
-                {showKeyboard && <MathKeyboard onInsert={handleInsert} onClear={handleClear} />}
+                
+                {input.g_str && (
+                  <div style={{ marginTop: '5px', padding: '8px', backgroundColor: '#f1f8ff', border: '1px dashed #b6d4fe', borderRadius: '4px', display: 'flex', justifyContent: 'center', minHeight: '40px', alignItems: 'center' }}>
+                     <FormulaDisplay formula={`g(x) = ${formatToLatex(input.g_str)}`} />
+                  </div>
+                )}
+
+                {activeKeyboard === 'g' && <MathKeyboard onInsert={(t) => setInput({...input, g_str: input.g_str + t})} onClear={() => setInput({...input, g_str: ''})} />}
               </div>
             )}
 
@@ -198,12 +224,19 @@ export default function RootFinding() {
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <label>f(x):</label>
-                    <button type="button" onClick={() => setShowKeyboard(!showKeyboard)} className="btn-keyboard-toggle">
-                        {showKeyboard ? '✖ Cerrar' : '⌨ Teclado'}
+                    <button type="button" onClick={() => setActiveKeyboard(activeKeyboard === 'f' ? null : 'f')} className="btn-keyboard-toggle" style={{fontSize: '11px', padding: '2px 8px', cursor:'pointer', borderRadius:'4px', border:'1px solid #ccc'}}>
+                        {activeKeyboard === 'f' ? '✖ Cerrar' : '⌨ Teclado'}
                     </button>
                 </div>
                 <input type="text" value={input.func_str} onChange={(e) => setInput({...input, func_str: e.target.value})} />
-                {showKeyboard && <MathKeyboard onInsert={handleInsert} onClear={handleClear} />}
+                
+                {input.func_str && (
+                  <div style={{ marginTop: '5px', padding: '8px', backgroundColor: '#f1f8ff', border: '1px dashed #b6d4fe', borderRadius: '4px', display: 'flex', justifyContent: 'center', minHeight: '40px', alignItems: 'center' }}>
+                     <FormulaDisplay formula={`f(x) = ${formatToLatex(input.func_str)}`} />
+                  </div>
+                )}
+
+                {activeKeyboard === 'f' && <MathKeyboard onInsert={(t) => setInput({...input, func_str: input.func_str + t})} onClear={() => setInput({...input, func_str: ''})} />}
               </div>
             )}
 

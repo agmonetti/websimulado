@@ -47,6 +47,25 @@ const handleClear = () => {
   setInput({ ...input, func_str: '' });
 
 };
+
+  const formatToLatex = (str: string) => {
+    if (!str) return '';
+    let latex = str.toLowerCase();
+    latex = latex.replace(/\*\*/g, '^'); 
+    latex = latex.replace(/\*/g, ' \\cdot '); 
+    latex = latex.replace(/exp\(([^)]+)\)/g, 'e^{$1}'); 
+    latex = latex.replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}'); 
+    latex = latex.replace(/\bpi\b/g, '\\pi');
+    latex = latex.replace(/\be\b/g, 'e');
+    latex = latex.replace(/sen\(/g, '\\sin(');
+    latex = latex.replace(/sin\(/g, '\\sin(');
+    latex = latex.replace(/cos\(/g, '\\cos(');
+    latex = latex.replace(/tan\(/g, '\\tan(');
+    latex = latex.replace(/log\(/g, '\\ln(');
+    latex = latex.replace(/ln\(/g, '\\ln(');
+    return latex;
+  }
+
   // SÚPER TRADUCTOR MATEMÁTICO (Convierte pi/4 -> 0.785...)
   const parseMathExpr = (expr: string): number => {
     if (!expr || expr.trim() === '') return NaN;
@@ -215,6 +234,11 @@ const generateDerivativePlot = () => {
     value={input.func_str}
     onChange={(e) => setInput({...input, func_str: e.target.value})}
   />
+  {input.func_str && (
+    <div style={{ marginTop: '5px', padding: '8px', backgroundColor: '#f1f8ff', border: '1px dashed #b6d4fe', borderRadius: '4px', display: 'flex', justifyContent: 'center', minHeight: '40px', alignItems: 'center' }}>
+      <FormulaDisplay formula={`f(x) = ${formatToLatex(input.func_str)}`} />
+    </div>
+  )}
   {showKeyboard && (
     <MathKeyboard 
       onInsert={(text) => setInput({ ...input, func_str: input.func_str + text })} 

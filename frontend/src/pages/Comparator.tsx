@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { rootFindingService, integrationService } from '../services/api' 
 import PlotlyGraph from '../components/PlotlyGraph'
+import FormulaDisplay from '../components/FormulaDisplay'
 import '../styles/Method.css'
-  import MathKeyboard from '../components/MathKeyboard';
+import MathKeyboard from '../components/MathKeyboard';
 
 
 export default function Comparator() {
@@ -36,6 +37,24 @@ const handleInsert = (text: string) => {
         setInput({ ...input, func_str: input.func_str + text });
     }
 };
+
+const formatToLatex = (str: string) => {
+    if (!str) return '';
+    let latex = str.toLowerCase();
+    latex = latex.replace(/\*\*/g, '^'); 
+    latex = latex.replace(/\*/g, ' \\cdot '); 
+    latex = latex.replace(/exp\(([^)]+)\)/g, 'e^{$1}'); 
+    latex = latex.replace(/sqrt\(([^)]+)\)/g, '\\sqrt{$1}'); 
+    latex = latex.replace(/\bpi\b/g, '\\pi');
+    latex = latex.replace(/\be\b/g, 'e');
+    latex = latex.replace(/sen\(/g, '\\sin(');
+    latex = latex.replace(/sin\(/g, '\\sin(');
+    latex = latex.replace(/cos\(/g, '\\cos(');
+    latex = latex.replace(/tan\(/g, '\\tan(');
+    latex = latex.replace(/log\(/g, '\\ln(');
+    latex = latex.replace(/ln\(/g, '\\ln(');
+    return latex;
+}
 
   const handleModeChange = (newMode: string) => {
     setMode(newMode)
@@ -196,6 +215,11 @@ const handleInsert = (text: string) => {
       </button>
     </div>
     <input type="text" value={input.func_str} onChange={(e) => setInput({...input, func_str: e.target.value})} />
+    {input.func_str && (
+      <div style={{ marginTop: '5px', padding: '8px', backgroundColor: '#f1f8ff', border: '1px dashed #b6d4fe', borderRadius: '4px', display: 'flex', justifyContent: 'center', minHeight: '40px', alignItems: 'center' }}>
+        <FormulaDisplay formula={`f(x) = ${formatToLatex(input.func_str)}`} />
+      </div>
+    )}
     {activeKeyboard === 'f' && (
       <MathKeyboard 
         onInsert={(text) => setInput({ ...input, func_str: input.func_str + text })} 
@@ -218,6 +242,11 @@ const handleInsert = (text: string) => {
         </button>
       </div>
       <input type="text" value={input.g_str} onChange={(e) => setInput({...input, g_str: e.target.value})} />
+      {input.g_str && (
+        <div style={{ marginTop: '5px', padding: '8px', backgroundColor: '#f1f8ff', border: '1px dashed #b6d4fe', borderRadius: '4px', display: 'flex', justifyContent: 'center', minHeight: '40px', alignItems: 'center' }}>
+          <FormulaDisplay formula={`g(x) = ${formatToLatex(input.g_str)}`} />
+        </div>
+      )}
       {activeKeyboard === 'g' && (
         <MathKeyboard 
           onInsert={(text) => setInput({ ...input, g_str: input.g_str + text })} 
