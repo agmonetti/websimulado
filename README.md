@@ -56,7 +56,7 @@ Monte Carlo
 - ~dejar diferencias finitas funcional al 100%.~
 - ~tratar la 'tolerancia' y 'precision' de las tablas iterativas.~
 - ~metodos comparativos.~
-- teclado matematico.
+- ~teclado matematico.~
 - mostrar en el mismo modo 'formula' que mostramos la formula de teoria de cada metodo, la funcion, ya sea f(x) o g(x) para corroborar que la estamos tipeando correctamente, es decir, es la misma que la planteada en el ejercicio. mostrarla justo debajo de dicha funcion.
 - mejorar la visual de la barra izquierda lateral, esta muy fea.
 - montecarlo.

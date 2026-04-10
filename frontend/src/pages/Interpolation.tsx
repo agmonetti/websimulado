@@ -20,13 +20,13 @@ export default function Interpolation() {
   const [error, setError] = useState('')
   const [showKeyboard, setShowKeyboard] = useState(false);
 
-const handleInsert = (text: string) => {
-    setInput({ ...input, func_str: input.func_str + text });
-};
+  const handleInsert = (text: string) => {
+      setInput({ ...input, func_str: input.func_str + text });
+  };
 
-const handleClear = () => {
-    setInput({ ...input, func_str: '' });
-};
+  const handleClear = () => {
+      setInput({ ...input, func_str: '' });
+  };
 
   // SÚPER TRADUCTOR MATEMÁTICO (Convierte pi/4 -> 0.785...)
   const parseMathExpr = (expr: string): number => {
@@ -153,7 +153,7 @@ const handleClear = () => {
   const theory = {
     nombre: 'Interpolación de Lagrange',
     descripcion: 'Construye un polinomio de grado n-1 que pasa por n puntos dados.',
-   formula: 'P(x) = \\sum_{i=0}^{n} y_i L_i(x), \\quad L_i(x) = \\prod_{\\begin{smallmatrix}  j=0 \\\\  i!=j \\end{smallmatrix}}^{n} \\frac{x - x_j}{x_i - x_j}',
+    formula: 'P(x) = \\sum_{i=0}^{n} y_i L_i(x), \\quad L_i(x) = \\prod_{\\begin{smallmatrix}  j=0 \\\\  i!=j \\end{smallmatrix}}^{n} \\frac{x - x_j}{x_i - x_j}',
     condiciones: 'Exacta en los puntos conocidos. Error en extrapolación puede ser grande fuera del rango.'
   }
 
@@ -166,32 +166,44 @@ const handleClear = () => {
         <p><strong>Descripcion:</strong> {theory.descripcion}</p>
         <FormulaDisplay formula={theory.formula} title="Formula:" />
         <p><strong>Condiciones:</strong> {theory.condiciones}</p>
-        
-        <div style={{ marginTop: '10px', background: '#e6f2ff', padding: '8px', borderLeft: '4px solid #0066cc' }}>
-          <ul style={{ margin: '5px 0', paddingLeft: '20px' }}>
-            <li><strong>Caso 1:</strong> La función está dada, entonces no hacen falta los puntos_y ya que se calculan. Hace falta la función, los puntos_x y el x_eval.</li>
-            <li><strong>Caso 2:</strong> No tengo la función, entonces hace falta puntos_x, puntos_y y x_eval.</li>
-            <li><strong>Importante:</strong> El x_eval es opcional. Si lo dejas vacío, el resultado solo mostrará el polinomio final sin evaluar ningún punto específico.</li>
-            <li>
-              <strong>Caso a tener en cuenta: tengo los puntos_x y los puntos_y, pero un punto_y es una constante 'k' que no conozco, para hallarla, paso como x_eval el punto_x del que no tengo su punto_y</strong>
-              <ul>
-                <li>ejemplo: x:[0,1,2,3,4] y: [1,2,b,2,3], entonces, parametros: x[0,1,3,4], y:[1,2,2,3] y x_eval: 2</li>
-                <li>resultado: P(2) = 2</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
       </div>
 
       <div className="method-container">
         <div className="form-section">
           <h2>Parametros</h2>
 
-          <div style={{ marginBottom: '15px', padding: '10px', background: '#f0f0f0', border: '1px solid #ccc' }}>
-            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Seleccione el Caso de Uso:</label>
-            <div style={{ display: 'flex', gap: '15px' }}>
-              <label><input type="radio" value="caso1" checked={modo === 'caso1'} onChange={(e) => setModo(e.target.value)} style={{ marginRight: '5px' }}/>Caso 1: Usar f(x)</label>
-              <label><input type="radio" value="caso2" checked={modo === 'caso2'} onChange={(e) => setModo(e.target.value)} style={{ marginRight: '5px' }}/>Caso 2: Puntos Directos</label>
+          {/* SELECTOR CORREGIDO EN SU LUGAR CORRECTO */}
+          <div style={{ marginBottom: '12px', padding: '8px', backgroundColor: '#c0c0c0', border: '2px solid', borderColor: '#dfdfdf #808080 #808080 #dfdfdf' }}>
+            <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '8px', color: '#000', fontSize: '12px' }}>
+              Seleccione el Caso de Uso:
+            </label>
+            
+            <div style={{ display: 'flex' }}>
+              <button 
+                type="button" 
+                onClick={() => setModo('caso1')} 
+                style={{ 
+                  flex: 1, padding: '6px', cursor: 'pointer', backgroundColor: '#c0c0c0', color: '#000', fontSize: '13px',
+                  border: '2px solid',
+                  borderColor: modo === 'caso1' ? '#808080 #dfdfdf #dfdfdf #808080' : '#dfdfdf #808080 #808080 #dfdfdf',
+                  fontWeight: modo === 'caso1' ? 'bold' : 'normal'
+                }}
+              >
+                Caso 1: Usar f(x)
+              </button>
+
+              <button 
+                type="button" 
+                onClick={() => setModo('caso2')} 
+                style={{ 
+                  flex: 1, padding: '6px', cursor: 'pointer', backgroundColor: '#c0c0c0', color: '#000', fontSize: '13px',
+                  border: '2px solid',
+                  borderColor: modo === 'caso2' ? '#808080 #dfdfdf #dfdfdf #808080' : '#dfdfdf #808080 #808080 #dfdfdf',
+                  fontWeight: modo === 'caso2' ? 'bold' : 'normal'
+                }}
+              >
+                Caso 2: Puntos Directos
+              </button>
             </div>
           </div>
 
@@ -225,19 +237,21 @@ const handleClear = () => {
               </div>
             )}
 
-            <div className="form-group">
-              <label>Evaluar en x (Opcional):</label>
-              {/* CAMBIADO DE type="number" a type="text" */}
-              <input type="text" value={input.x_eval} onChange={(e) => setInput({...input, x_eval: e.target.value})} />
-              <small style={{ color: '#0066cc', fontWeight: 'bold' }}>Ej: pi/4, 1/3. Dejar vacío si solo buscas el Polinomio.</small>
+            {/* GRILLA UNIFICADA PARA EVALUACIÓN Y PRECISIÓN */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="form-group">
+                <label>Evaluar en x (Opcional):</label>
+                <input type="text" value={input.x_eval} onChange={(e) => setInput({...input, x_eval: e.target.value})} />
+                <small style={{ color: '#0066cc' }}>Ej: pi/4</small>
+              </div>
+
+              <div className="form-group">
+                <label>Decimales (Visual):</label>
+                <input type="number" min="1" max="15" value={input.precision} onChange={(e) => setInput({...input, precision: e.target.value})} />
+              </div>
             </div>
 
-            <div className="form-group">
-              <label>Decimales (precision):</label>
-              <input type="number" min="1" max="15" value={input.precision} onChange={(e) => setInput({...input, precision: e.target.value})} />
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary">
+            <button type="submit" disabled={loading} className="btn-primary" style={{ marginTop: '10px' }}>
               {loading ? 'Interpolando...' : 'Calcular Lagrange'}
             </button>
           </form>
@@ -303,7 +317,7 @@ const handleClear = () => {
                       </div>
                     </div>
 
-                    <div className="result-box" style={{ background: result.analisis_error.exito ? '#e6ffe6' : '#ffe6e6', border: `2px solid ${result.analisis_error.exito ? '#008000' : '#cc0000'}` }}>
+                    <div className="result-box" style={{ background: result.analisis_error.exito ? '#c0c0c0' : '#c0c0c0', border: `2px solid ${result.analisis_error.exito ? '#008000' : '#cc0000'}` }}>
                       <h3 style={{ margin: '0 0 10px 0', color: '#000080' }}>--- 5. Demostración Final ---</h3>
                       <p style={{ fontSize: '14px', fontWeight: 'bold', color: result.analisis_error.exito ? '#008000' : '#cc0000' }}>
                         {result.analisis_error.exito ? '¡Éxito!' : '¡Fallo!'} Cota global ({result.analisis_error.cota_global.toFixed(6)}) {result.analisis_error.exito ? '≥' : '<'} Error Local ({result.error_local.toFixed(6)})
