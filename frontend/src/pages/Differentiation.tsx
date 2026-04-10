@@ -3,6 +3,8 @@ import { differentiationService } from '../services/api'
 import PlotlyGraph from '../components/PlotlyGraph'
 import FormulaDisplay from '../components/FormulaDisplay'
 import '../styles/Method.css'
+import MathKeyboard from '../components/MathKeyboard';
+
 
 // COMPONENTE AUXILIAR PARA RENDERIZAR EL ERROR EN DOS FORMATOS
 const ErrorCell = ({ errorRaw, precision }: { errorRaw: number, precision: number }) => {
@@ -30,6 +32,21 @@ export default function Differentiation() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+const [showKeyboard, setShowKeyboard] = useState(false);
+
+
+const handleInsert = (text: string) => {
+
+  setInput({ ...input, func_str: input.func_str + text });
+
+};
+
+
+const handleClear = () => {
+
+  setInput({ ...input, func_str: '' });
+
+};
   // SÚPER TRADUCTOR MATEMÁTICO (Convierte pi/4 -> 0.785...)
   const parseMathExpr = (expr: string): number => {
     if (!expr || expr.trim() === '') return NaN;
@@ -186,35 +203,32 @@ const generateDerivativePlot = () => {
           <h2>Parametros</h2>
 
           <form onSubmit={handleSubmit} className="param-form">
-            <div className="form-group">
-              <label>f(x):</label>
-              <input
-                type="text"
-                value={input.func_str}
-                onChange={(e) => setInput({...input, func_str: e.target.value})}
-              />
-              <small>Ej: sin(x) o ln(x+1)</small>
-            </div>
+<div className="form-group">
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <label>f(x):</label>
+    <button type="button" onClick={() => setShowKeyboard(!showKeyboard)} className="btn-keyboard-toggle">
+      {showKeyboard ? '✖ Cerrar' : '⌨ Teclado'}
+    </button>
+  </div>
+  <input
+    type="text"
+    value={input.func_str}
+    onChange={(e) => setInput({...input, func_str: e.target.value})}
+  />
+  {showKeyboard && (
+    <MathKeyboard 
+      onInsert={(text) => setInput({ ...input, func_str: input.func_str + text })} 
+      onClear={() => setInput({ ...input, func_str: '' })} 
+    />
+  )}
+</div>
 
-            <div className="form-group">
-              <label>Punto a evaluar (x):</label>
-              <input
-                type="text"
-                value={input.x_val}
-                onChange={(e) => setInput({...input, x_val: e.target.value})}
-              />
-              <small>Ej: pi/4, 1/3, 0.5</small>
-            </div>
+<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+  <div className="form-group"><label>Punto a evaluar (x):</label><input type="text" value={input.x_val} onChange={(e) => setInput({...input, x_val: e.target.value})} /></div>
+  <div className="form-group"><label>Paso (h):</label><input type="text" value={input.h} onChange={(e) => setInput({...input, h: e.target.value})} /></div>
+</div>
 
-            <div className="form-group">
-              <label>Paso (h):</label>
-              <input
-                type="text"
-                value={input.h}
-                onChange={(e) => setInput({...input, h: e.target.value})}
-              />
-              <small>Ej: 0.1, 0.01</small>
-            </div>
+
 
             <div className="form-group">
               <label>Decimales (precision):</label>

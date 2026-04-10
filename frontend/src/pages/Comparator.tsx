@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { rootFindingService, integrationService } from '../services/api' 
 import PlotlyGraph from '../components/PlotlyGraph'
 import '../styles/Method.css'
+  import MathKeyboard from '../components/MathKeyboard';
+
 
 export default function Comparator() {
   const [mode, setMode] = useState('raices')
@@ -20,6 +22,20 @@ export default function Comparator() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+// ... dentro del componente, antes del return:
+const [activeKeyboard, setActiveKeyboard] = useState<string | null>(null);
+
+const handleInsert = (text: string) => {
+    // Si estamos en raíces y el método es Punto Fijo/Aitken, insertamos en g_str
+    if (mode === 'raices' && (input.g_str !== undefined)) {
+        // Podés elegir si querés que inserte en f o en g, 
+        // acá lo hacemos simple: que inserte en el que el usuario quiera
+        setInput({ ...input, func_str: input.func_str + text });
+    } else {
+        setInput({ ...input, func_str: input.func_str + text });
+    }
+};
 
   const handleModeChange = (newMode: string) => {
     setMode(newMode)
@@ -168,17 +184,48 @@ export default function Comparator() {
           </div>
 
           <form onSubmit={handleSubmit} className="param-form">
-            <div className="form-group">
-              <label>f(x):</label>
-              <input type="text" value={input.func_str} onChange={(e) => setInput({...input, func_str: e.target.value})} />
-            </div>
+<div className="form-group">
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <label>f(x) [Raíces/Newton]:</label>
+      <button 
+        type="button" 
+        onClick={() => setActiveKeyboard(activeKeyboard === 'f' ? null : 'f')} 
+        style={{fontSize: '11px', padding: '2px 8px', cursor:'pointer', borderRadius:'4px', border:'1px solid #ccc'}}
+      >
+        {activeKeyboard === 'f' ? '✖ Cerrar' : '⌨ Teclado'}
+      </button>
+    </div>
+    <input type="text" value={input.func_str} onChange={(e) => setInput({...input, func_str: e.target.value})} />
+    {activeKeyboard === 'f' && (
+      <MathKeyboard 
+        onInsert={(text) => setInput({ ...input, func_str: input.func_str + text })} 
+        onClear={() => setInput({ ...input, func_str: '' })} 
+      />
+    )}
+  </div>
 
-            {mode === 'raices' && (
-              <div className="form-group">
-                <label>g(x) [Punto Fijo/Aitken]:</label>
-                <input type="text" value={input.g_str} onChange={(e) => setInput({...input, g_str: e.target.value})} />
-              </div>
-            )}
+  {/* CAMPO PARA g(x) - Solo en modo raíces */}
+  {mode === 'raices' && (
+    <div className="form-group">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <label>g(x) [Punto Fijo/Aitken]:</label>
+        <button 
+          type="button" 
+          onClick={() => setActiveKeyboard(activeKeyboard === 'g' ? null : 'g')} 
+          style={{fontSize: '11px', padding: '2px 8px', cursor:'pointer', borderRadius:'4px', border:'1px solid #ccc'}}
+        >
+          {activeKeyboard === 'g' ? '✖ Cerrar' : '⌨ Teclado'}
+        </button>
+      </div>
+      <input type="text" value={input.g_str} onChange={(e) => setInput({...input, g_str: e.target.value})} />
+      {activeKeyboard === 'g' && (
+        <MathKeyboard 
+          onInsert={(text) => setInput({ ...input, g_str: input.g_str + text })} 
+          onClear={() => setInput({ ...input, g_str: '' })} 
+        />
+      )}
+    </div>
+  )} 
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div className="form-group"><label>Límite a (Inf):</label><input type="number" step="any" value={input.a} onChange={(e) => setInput({...input, a: e.target.value})} /></div>

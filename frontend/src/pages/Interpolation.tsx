@@ -3,6 +3,8 @@ import { interpolationService } from '../services/api'
 import PlotlyGraph from '../components/PlotlyGraph'
 import FormulaDisplay from '../components/FormulaDisplay'
 import '../styles/Method.css'
+import MathKeyboard from '../components/MathKeyboard';
+
 
 export default function Interpolation() {
   const [modo, setModo] = useState('caso1')
@@ -16,6 +18,15 @@ export default function Interpolation() {
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showKeyboard, setShowKeyboard] = useState(false);
+
+const handleInsert = (text: string) => {
+    setInput({ ...input, func_str: input.func_str + text });
+};
+
+const handleClear = () => {
+    setInput({ ...input, func_str: '' });
+};
 
   // SÚPER TRADUCTOR MATEMÁTICO (Convierte pi/4 -> 0.785...)
   const parseMathExpr = (expr: string): number => {
@@ -188,8 +199,14 @@ export default function Interpolation() {
             
             {modo === 'caso1' && (
               <div className="form-group">
-                <label>f(x) (para generar las imágenes):</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label>f(x) (para generar las imágenes):</label>
+                  <button type="button" onClick={() => setShowKeyboard(!showKeyboard)} className="btn-keyboard-toggle">
+                    {showKeyboard ? '✖ Cerrar' : '⌨ Teclado'}
+                  </button>
+                </div>
                 <input type="text" value={input.func_str} onChange={(e) => setInput({...input, func_str: e.target.value})} />
+                {showKeyboard && <MathKeyboard onInsert={handleInsert} onClear={handleClear} />}
                 <small>Ej: sin(x), exp(x), x**2</small>
               </div>
             )}

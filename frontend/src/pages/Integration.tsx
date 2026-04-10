@@ -3,6 +3,8 @@ import { integrationService } from '../services/api'
 import PlotlyGraph from '../components/PlotlyGraph'
 import FormulaDisplay from '../components/FormulaDisplay'
 import '../styles/Method.css'
+import MathKeyboard from '../components/MathKeyboard';
+
 
 export default function Integration() {
   const [method, setMethod] = useState('trapecio-compuesto')
@@ -13,6 +15,16 @@ export default function Integration() {
     n: '4',
     precision: '8'
   })
+
+const [showKeyboard, setShowKeyboard] = useState(false);
+
+const handleInsert = (text: string) => {
+  setInput({ ...input, func_str: input.func_str + text });
+};
+
+const handleClear = () => {
+  setInput({ ...input, func_str: '' });
+};
   const [result, setResult] = useState<any>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -205,9 +217,39 @@ const theories: Record<string, any> = {
 
           <form onSubmit={handleSubmit} className="param-form">
             <div className="form-group">
-              <label>f(x):</label>
-              <input type="text" value={input.func_str} onChange={(e) => setInput({...input, func_str: e.target.value})} />
-              <small>Ej: exp(-x**2) o sin(x)</small>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label>f(x) a integrar:</label>
+                <button 
+                  type="button" 
+                  onClick={() => setShowKeyboard(!showKeyboard)} 
+                  className="btn-keyboard-toggle"
+                  style={{ fontSize: '11px', padding: '2px 8px', cursor: 'pointer', borderRadius: '4px', border: '1px solid #ccc' }}
+                >
+                  {showKeyboard ? '✖ Cerrar' : '⌨ Teclado'}
+                </button>
+              </div>
+              <input
+                type="text"
+                value={input.func_str}
+                onChange={(e) => setInput({...input, func_str: e.target.value})}
+                placeholder="Ej: sin(x) + exp(x)"
+              />
+              {showKeyboard && (
+                <MathKeyboard 
+                  onInsert={(text) => setInput({ ...input, func_str: input.func_str + text })} 
+                  onClear={() => setInput({ ...input, func_str: '' })} 
+                />
+              )}
+            </div>
+
+            {/* Layout de grilla para los límites y n */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="form-group"><label>Límite a:</label><input type="number" step="any" value={input.a} onChange={(e) => setInput({...input, a: e.target.value})} /></div>
+              <div className="form-group"><label>Límite b:</label><input type="number" step="any" value={input.b} onChange={(e) => setInput({...input, b: e.target.value})} /></div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div className="form-group"><label>Subintervalos (n):</label><input type="number" value={input.n} onChange={(e) => setInput({...input, n: e.target.value})} /></div>
+              <div className="form-group"><label>Decimales:</label><input type="number" value={input.precision} onChange={(e) => setInput({...input, precision: e.target.value})} /></div>
             </div>
 
             <div className="form-group">
