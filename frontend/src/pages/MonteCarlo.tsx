@@ -215,7 +215,8 @@ ${validacion_texto}${analisis_j}`}
 
       <div className="theory-section">
         <h3>Teoría: Simulación Monte Carlo</h3>
-        <p>Aproximación de integrales mediante muestreo aleatorio uniforme y análisis estadístico.</p>
+        <p>Aproximación de integrales mediante muestreo aleatorio uniforme y análisis estadístico. Los graficos estan limitados a 2000 puntos para no sobrecargar el sistema</p>
+        <p>El factor 'j' se utiliza para reducir el error j veces, ejemplo, si quiero reducir el error en 10 veces, uso j=10 </p>
         <FormulaDisplay formula={formula_general} title="Fórmula de Integración:" />
         {dimension === 'estadistico' && (
            <p style={{marginTop: '5px', fontSize: '11px'}}><strong>Nota (M: Réplicas):</strong> M indica cuántas veces se repite el experimento de N muestras para crear una distribución normal de integrales y medir la varianza real.</p>
