@@ -17,7 +17,7 @@ export default function MonteCarlo() {
     za: '0', zb: '1',
     N: '10000',
     seed: '',
-    M: '50',
+    M: '1000',
     nivel_confianza: '0.95',
     max_error: '', 
     factor_j: '',     
@@ -191,7 +191,7 @@ Z(α/2)        = ${result.z_score}
 │ Inferior: ${result.ic_inf}
 │ Superior: ${result.ic_sup}
 │ Ancho IC: ${(result.ic_sup - result.ic_inf).toFixed(parseInt(input.precision))}
-└───────────────────────────────────┘
+└──────────────────────────────┘
 
 ${validacion_texto}${analisis_j}`}
         </div>

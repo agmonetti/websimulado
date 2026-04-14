@@ -60,7 +60,7 @@ Monte Carlo - Hit-or-Miss, Valor Promedio, Convergencia, 1D, 2D, 3D
 ## To DO
 - probar montecarlo a full
 - terminar de corroborar todos los metodos
-- agregar comparacion de misma funcion de montecarlo en busca de reducir el error en un valor 'j'
+- ~agregar comparacion de misma funcion de montecarlo en busca de reducir el error en un valor 'j'~ - reprecated
 - ~dejar diferencias finitas funcional al 100%.~
 - ~tratar la 'tolerancia' y 'precision' de las tablas iterativas.~
 - ~metodos comparativos.~

@@ -20,7 +20,7 @@ class MonteCarloRequest(BaseModel):
     za: Optional[float] = None
     zb: Optional[float] = None
     # Para estadístico
-    M: Optional[int] = 50
+    M: Optional[int] = 1000
     nivel_confianza: Optional[float] = 0.95
     max_error: Optional[float] = None
     
@@ -68,5 +68,5 @@ def valor_promedio_3d(req: MonteCarloRequest):
 def estadistico_1d(req: MonteCarloRequest):
     try:
         f = MonteCarloService.compilar_funcion(req.func_str, 'x')
-        return MonteCarloService.analisis_estadistico_1d(f, req.a, req.b, req.N, req.M or 50, req.nivel_confianza or 0.95, req.seed, req.precision or 8)
+        return MonteCarloService.analisis_estadistico_1d(f, req.a, req.b, req.N, req.M or 1000, req.nivel_confianza or 0.95, req.seed, req.precision or 8)
     except Exception as e: raise HTTPException(status_code=400, detail=str(e))
