@@ -2,7 +2,7 @@
 
 Plataforma Full-Stack diseñada para la resolución, análisis estadístico y visualización de métodos numéricos. Desarrollada como proyecto académico para la Universidad Argentina de la Empresa (UADE).
 
-## Inicio Rapido
+## Inicio
 
 ### Opcion 1: Backend Python (Terminal 1)
 
@@ -57,13 +57,13 @@ docker-compose up
 ## To DO
 - probar montecarlo a full
 - terminar de corroborar todos los metodos
+- 
 - ~metodo comparador de integraciones, no muestra si se tuvo que aplciar un rescate matematico~
-
-- ~mobile display iniciada:
-    imporante tratar:
-    * Sidebar
-    * los graficos y tablas
-    * grillas de parametros~
+- ~mobile display iniciada:~
+    ~imporante tratar:~
+    * ~Sidebar~
+    * ~los graficos y tablas~
+    * ~grillas de parametros~
 - ~metodos de integracion tienen duplicados los parametros de limites y n.~
 - ~barra lateral izquierda, agrandar letra~
 - ~agregar comparacion de misma funcion de montecarlo en busca de reducir el error en un valor 'j'~ - reprecated
@@ -77,4 +77,4 @@ docker-compose up
 
 ## Futuro
 
-- []Desarrollo de Servidor MCP (Model Context Protocol): Extracción del core matemático para exponerlo directamente como herramientas nativas para LLMs (Large Language Models), eliminando la dependencia del entorno web completo.
+- Desarrollo de Servidor MCP (Model Context Protocol): Extracción del core matemático para exponerlo directamente como herramientas nativas para LLMs (Large Language Models), eliminando la dependencia del entorno web completo.
