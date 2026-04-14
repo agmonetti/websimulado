@@ -6,7 +6,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <h1>Metodos Numericos</h1>
+      <h1>Metodos Numericos - Agustin Monetti - UADE</h1>
       
       <div className="intro-section">
         <p>Selecciona un metodo para comenzar</p>
