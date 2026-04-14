@@ -1,6 +1,6 @@
 # Modelado y Simulacion - Metodos Numericos Web
 
-Plataforma interactiva para resolver problemas con metodos numericos: raices, integracion, derivacion, interpolacion y Monte Carlo.
+Plataforma Full-Stack diseñada para la resolución, análisis estadístico y visualización de métodos numéricos. Desarrollada como proyecto académico para la Universidad Argentina de la Empresa (UADE).
 
 ## Inicio Rapido
 
@@ -39,22 +39,19 @@ docker-compose up --build
 docker-compose up
 ```
 
-Accede en: http://localhost (Frontend) y http://localhost:8000 (API)
-
 ---
 
 ## Metodos Disponibles
 
-Busqueda de Raices - Biseccion, Punto Fijo, Newton-Raphson, Aitken
+- Búsqueda de Raíces: Bisección, Newton-Raphson, Punto Fijo, Aceleración de Aitken.
 
-Integracion Numerica  - Trapecio, Simpson 1/3, Simpson 3/8, Rectangulo
+- Diferenciación Numérica: Diferencias Finitas (Progresiva, Regresiva, Central y Segunda Derivada).
 
-Derivacion - Diferencias finitas (1ra y 2da derivada)
+- Integración Numérica: Rectángulo Medio, Trapecio (Simple/Compuesto), Simpson 1/3 y 3/8 (Simples/Compuestos) + Comparador de exactitud.
 
-Interpolacion - Polinomio de Lagrange
+- Interpolación: Polinomio de Lagrange (con análisis de error global y local).
 
-Monte Carlo - Hit-or-Miss, Valor Promedio, Convergencia, 1D, 2D, 3D
-
+- Simulación Monte Carlo: Hit-or-Miss (1D), Valor Promedio (1D, 2D, 3D), Análisis Estadístico con Intervalos de Confianza y Factor de Reducción de Varianza.
 ---
 
 ## To DO
@@ -77,3 +74,7 @@ Monte Carlo - Hit-or-Miss, Valor Promedio, Convergencia, 1D, 2D, 3D
 - ~mostrar en el mismo modo 'formula' que mostramos la formula de teoria de cada metodo, la funcion, ya sea f(x) o g(x) para corroborar que la estamos tipeando correctamente, es decir, es la misma que la planteada en el ejercicio. mostrarla justo debajo de dicha funcion.~
 - ~mejorar la visual de la barra izquierda lateral, esta muy fea.~
 - ~montecarlo.~
+
+## Futuro
+
+- []Desarrollo de Servidor MCP (Model Context Protocol): Extracción del core matemático para exponerlo directamente como herramientas nativas para LLMs (Large Language Models), eliminando la dependencia del entorno web completo.
