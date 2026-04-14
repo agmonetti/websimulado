@@ -177,7 +177,7 @@ const formatToLatex = (str: string) => {
 
   return (
     <div className="method-page">
-      <h1>Panel Comparador Multimétodo</h1>
+      <h1>Comparacion de metodos</h1>
       <p style={{marginBottom: '20px', color: '#555'}}>Selecciona la familia de métodos que deseas orquestar en paralelo.</p>
 
       <div className="method-container">
@@ -201,6 +201,11 @@ const formatToLatex = (str: string) => {
               Integración Numérica
             </button>
           </div>
+          {mode === 'integracion' && (
+            <div style={{ marginBottom: '15px', padding: '10px', backgroundColor: '#e0f7fa', borderLeft: '4px solid #00acc1', fontSize: '12px', color: '#006064', borderRadius: '4px' }}>
+              <strong>ℹ Rescate Matemático:</strong> Si el método topa con una indeterminación al evaluar un punto (nodo o punto medio), el sistema calcula automáticamente su límite matemático exacto para evitar el colapso de la integral.
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="param-form">
 <div className="form-group">
