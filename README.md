@@ -56,6 +56,15 @@ docker-compose up
 - Simulación Monte Carlo: Hit-or-Miss (1D), Valor Promedio (1D, 2D, 3D), Análisis Estadístico con Intervalos de Confianza y Factor de Reducción de Varianza.
 ---
 
+## tests
+
+```bash
+cd backend
+source venv/bin/activate
+pytest
+
+```
+
 ## To DO
 - terminar de corroborar todos los metodos
 - revisar la teoria de los metodos
