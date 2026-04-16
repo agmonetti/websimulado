@@ -135,8 +135,8 @@ export default function EDO() {
           <p><strong>Problema:</strong> {theory.limitacion}</p>
         )}
 
-        {/* BLINDAJE RESPONSIVO */}
-        <div style={{ overflowX: 'auto', width: '100%', paddingBottom: '10px' }}>
+
+        <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
           <FormulaDisplay formula={theory.formula} title="Fórmula del Método:" />
         </div>
 
