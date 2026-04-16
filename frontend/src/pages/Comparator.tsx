@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import axios from 'axios'
-import { rootFindingService, integrationService } from '../services/api' 
+import { rootFindingService, integrationService, edoService } from '../services/api' 
 import PlotlyGraph from '../components/PlotlyGraph'
 import FormulaDisplay from '../components/FormulaDisplay'
 import '../styles/Method.css'
@@ -125,7 +124,7 @@ export default function Comparator() {
           xf: xf_val,
           h: h_val
         };
-        const response = await axios.post('http://localhost:8000/api/ode/resolver', payload);
+          const response = await edoService.resolver(payload);
         setResult({ type: 'edo', data: response.data });
       }
     } catch (error: any) {

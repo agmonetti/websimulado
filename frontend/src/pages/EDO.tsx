@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import PlotlyGraph from '../components/PlotlyGraph';
 import FormulaDisplay from '../components/FormulaDisplay';
 import MathKeyboard from '../components/MathKeyboard';
+import { edoService } from '../services/api';
 import '../styles/Method.css';
 
 export default function EDO() {
@@ -69,7 +69,7 @@ export default function EDO() {
         throw new Error("Uno o más parámetros (x0, y0, xf, h) contienen expresiones matemáticas inválidas.");
       }
 
-      const res = await axios.post('http://localhost:8000/api/ode/resolver', {
+      const res = await edoService.resolver({
         metodo: method,
         ecuacion: input.func_str,
         x0: x0_val,

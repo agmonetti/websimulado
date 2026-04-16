@@ -36,6 +36,10 @@ export const interpolationService = {
   lagrange: (data: any) => api.post('/interpolation/lagrange', data),
 }
 
+export const edoService = {
+  resolver: (data: any) => api.post('/ode/resolver', data),
+}
+
 export const monteCarloService = {
   hitOrMiss: (data: any) => api.post('/monte-carlo/hit-or-miss-1d', data),
   valorPromedio1d: (data: any) => api.post('/monte-carlo/valor-promedio-1d', data),
@@ -44,5 +48,7 @@ export const monteCarloService = {
   valorPromedio3d: (data: any) => api.post('/monte-carlo/valor-promedio-3d', data), // <-- ACÁ ESTÁ EL 3D CORRECTO
   estadistico: (data: any) => api.post('/monte-carlo/estadistico-1d', data),
 }
+
+
 
 export default api
