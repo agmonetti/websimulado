@@ -32,6 +32,28 @@ def test_rescate_matematico_integracion():
     assert resultado["integral"] == pytest.approx(0.946083, rel=1e-3)
     assert len(resultado["notas"]) > 0
 
+def test_trapecio_et_en_epsilon():
+    func = IntegrationService.compilar_funcion("x**2")
+    resultado = IntegrationService.trapecio_compuesto(func, 0, 1, n=1, precision=8, epsilon=0.5)
+
+    assert resultado["error_truncamiento"] == pytest.approx(-1/6, rel=1e-6)
+    assert resultado["detalle_error_truncamiento"]["orden_derivada"] == 2
+    assert resultado["detalle_error_truncamiento"]["derivada_en_epsilon"] == pytest.approx(2.0, rel=1e-8)
+
+def test_simpson_13_et_en_epsilon():
+    func = IntegrationService.compilar_funcion("x**6")
+    resultado = IntegrationService.simpson_13_compuesto(func, 0, 1, n=2, precision=8, epsilon=0.5)
+
+    assert resultado["error_truncamiento"] == pytest.approx(-0.03125, rel=1e-8)
+    assert resultado["detalle_error_truncamiento"]["orden_derivada"] == 4
+
+def test_et_epsilon_fuera_de_intervalo():
+    func = IntegrationService.compilar_funcion("x**2")
+    resultado = IntegrationService.trapecio_compuesto(func, 0, 1, n=1, precision=8, epsilon=2.0)
+
+    assert "fuera del intervalo" in resultado["error_truncamiento"]
+    assert resultado["detalle_error_truncamiento"] is None
+
 # ==========================================
 # 2. PRUEBAS DE BÚSQUEDA DE RAÍCES
 # ==========================================
@@ -129,6 +151,29 @@ def test_montecarlo_valor_promedio_deterministico():
     
     assert res["integral"] == pytest.approx(2.6666, rel=0.05)
     assert res["ic_inf"] < res["integral"] < res["ic_sup"] # Verifica que la integral esté dentro del IC
+    assert "media_muestral" in res
+    assert res["media_muestral"] == pytest.approx(res["promedio_fx"], rel=1e-10)
+
+
+def test_montecarlo_media_muestral_hit_or_miss():
+    func = MonteCarloService.compilar_funcion("x")
+    res = MonteCarloService.hit_or_miss_1d(func, 0, 2, N=5000, seed=123)
+
+    assert "media_muestral" in res
+    assert res["media_muestral"] == pytest.approx(res["n_exitos"] / res["N"], rel=1e-6)
+
+
+def test_montecarlo_media_muestral_2d_y_3d():
+    f2 = MonteCarloService.compilar_funcion("x + y", "x y")
+    res2 = MonteCarloService.valor_promedio_2d(f2, (0, 1), (0, 1), N=4000, seed=7)
+
+    f3 = MonteCarloService.compilar_funcion("x + y + z", "x y z")
+    res3 = MonteCarloService.valor_promedio_3d(f3, (0, 1), (0, 1), (0, 1), N=4000, seed=7)
+
+    assert "media_muestral" in res2
+    assert "media_muestral" in res3
+    assert res2["media_muestral"] == pytest.approx(res2["promedio_fxy"], rel=1e-10)
+    assert res3["media_muestral"] == pytest.approx(res3["promedio_fxyz"], rel=1e-10)
 
 
 # ==========================================

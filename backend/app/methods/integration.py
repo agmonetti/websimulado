@@ -69,9 +69,70 @@ class IntegrationService:
             
             func_inteligente.limites_calculados = []
             func_inteligente.grabar_rescates = False
+            func_inteligente.expr_sympy = expr
+            func_inteligente.x_symbol = x_sym
             return func_inteligente
         except Exception as e:
             raise ValueError(f"Error compilando funcion: {str(e)}")
+
+    @staticmethod
+    def _orden_derivada_et(metodo: str) -> int:
+        if metodo in ["rectangulo", "trapecio"]:
+            return 2
+        if metodo in ["simpson13", "simpson38"]:
+            return 4
+        raise ValueError("Método no soportado para error de truncamiento")
+
+    @staticmethod
+    def _coeficiente_et(a: float, b: float, n: int, metodo: str) -> float:
+        if metodo == "rectangulo":
+            return ((b - a) ** 3) / (24 * (n ** 2))
+        if metodo == "trapecio":
+            return -((b - a) ** 3) / (12 * (n ** 2))
+        if metodo == "simpson13":
+            return -((b - a) ** 5) / (180 * (n ** 4))
+        if metodo == "simpson38":
+            return -((b - a) ** 5) / (80 * (n ** 4))
+        raise ValueError("Método no soportado para error de truncamiento")
+
+    @staticmethod
+    def _derivada_n_valor(expr: sp.Expr, x_sym: sp.Symbol, n: int, punto: float) -> float:
+        return float(sp.diff(expr, x_sym, n).subs(x_sym, punto))
+
+    @staticmethod
+    def _calcular_error_truncamiento_epsilon(
+        f: Callable,
+        a: float,
+        b: float,
+        n: int,
+        metodo: str,
+        epsilon: float,
+        precision: int,
+    ):
+        if epsilon is None:
+            return "No definido (falta epsilon)"
+
+        if epsilon < min(a, b) or epsilon > max(a, b):
+            return "No definido (epsilon fuera del intervalo [a,b])"
+
+        expr = getattr(f, "expr_sympy", None)
+        x_sym = getattr(f, "x_symbol", None)
+        if expr is None or x_sym is None:
+            return "No definido (función simbólica no disponible)"
+
+        try:
+            orden = IntegrationService._orden_derivada_et(metodo)
+            coeficiente = IntegrationService._coeficiente_et(a, b, n, metodo)
+            derivada = IntegrationService._derivada_n_valor(expr, x_sym, orden, epsilon)
+            et = coeficiente * derivada
+            return {
+                "epsilon": round(float(epsilon), precision),
+                "orden_derivada": orden,
+                "derivada_en_epsilon": round(float(derivada), precision),
+                "error_truncamiento": round(float(et), precision),
+            }
+        except Exception:
+            return "Indefinido matemáticamente en epsilon"
 
     @staticmethod
     def _verificar_asintota(y_array: np.ndarray):
@@ -140,7 +201,7 @@ class IntegrationService:
             return "Indefinido matemáticamente"
 
     @staticmethod
-    def rectangulo_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8) -> Dict:
+    def rectangulo_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8, epsilon: float = None) -> Dict:
         IntegrationService._validar_integral(f, a, b)
         h = (b - a) / n
         x = np.linspace(a, b, n + 1)
@@ -156,6 +217,7 @@ class IntegrationService:
         IntegrationService._verificar_asintota(y_medio)
         integral = h * np.sum(y_medio)
         cota_error = IntegrationService._calcular_cota_error(f, a, b, n, "rectangulo", precision)
+        et_puntual = IntegrationService._calcular_error_truncamiento_epsilon(f, a, b, n, "rectangulo", epsilon, precision)
         
         tabla = [{"i": 0, "x_n": round(float(x[0]), precision), "x_medio": None, "f_x_medio": None}]
         for i in range(n):
@@ -170,11 +232,13 @@ class IntegrationService:
         return {
             "metodo": "Rectangulo Compuesto", "a": a, "b": b, "n": n, "h": round(h, precision),
             "integral": round(float(integral), precision), "cota_error": cota_error,
+            "error_truncamiento": et_puntual["error_truncamiento"] if isinstance(et_puntual, dict) else et_puntual,
+            "detalle_error_truncamiento": et_puntual if isinstance(et_puntual, dict) else None,
             "tabla": tabla, "desarrollo": desarrollo, "notas": notas_unicas
         }
     
     @staticmethod
-    def trapecio_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8) -> Dict:
+    def trapecio_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8, epsilon: float = None) -> Dict:
         IntegrationService._validar_integral(f, a, b)
         h = (b - a) / n
         x = np.linspace(a, b, n + 1)
@@ -190,6 +254,7 @@ class IntegrationService:
         S = y[0] + y[-1] + 2 * np.sum(y[1:-1])
         integral = (h / 2) * S
         cota_error = IntegrationService._calcular_cota_error(f, a, b, n, "trapecio", precision)
+        et_puntual = IntegrationService._calcular_error_truncamiento_epsilon(f, a, b, n, "trapecio", epsilon, precision)
         
         tabla = [{"i": i, "x_n": round(float(x[i]), precision), "f_x_n": round(float(y[i]), precision)} for i in range(len(x))]
         desarrollo = f"I ≈ {h:.4f}/2 [ {y[0]:.{precision}f} + {y[-1]:.{precision}f} ]" if n == 1 else f"I ≈ {h:.4f}/2 [ {y[0]:.{precision}f} + 2({' + '.join([f'{yi:.{precision}f}' for yi in y[1:-1]])}) + {y[-1]:.{precision}f} ]"
@@ -200,11 +265,13 @@ class IntegrationService:
         return {
             "metodo": "Trapecio Compuesto" if n > 1 else "Trapecio Simple", "a": a, "b": b, "n": n, "h": round(h, precision),
             "integral": round(float(integral), precision), "cota_error": cota_error,
+            "error_truncamiento": et_puntual["error_truncamiento"] if isinstance(et_puntual, dict) else et_puntual,
+            "detalle_error_truncamiento": et_puntual if isinstance(et_puntual, dict) else None,
             "tabla": tabla, "desarrollo": desarrollo, "notas": notas_unicas
         }
     
     @staticmethod
-    def simpson_13_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8) -> Dict:
+    def simpson_13_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8, epsilon: float = None) -> Dict:
         IntegrationService._validar_integral(f, a, b)
         if n % 2 != 0: raise ValueError("n debe ser PAR para Simpson 1/3")
         
@@ -225,6 +292,7 @@ class IntegrationService:
         S = y[0] + y[-1] + 4 * np.sum(impares) + 2 * np.sum(pares)
         integral = (h / 3) * S
         cota_error = IntegrationService._calcular_cota_error(f, a, b, n, "simpson13", precision)
+        et_puntual = IntegrationService._calcular_error_truncamiento_epsilon(f, a, b, n, "simpson13", epsilon, precision)
         
         tabla = [{"i": i, "x_n": round(float(x[i]), precision), "f_x_n": round(float(y[i]), precision)} for i in range(len(x))]
         desarrollo = f"I ≈ {h:.4f}/3 [ {y[0]:.{precision}f} + 4({y[1]:.{precision}f}) + {y[2]:.{precision}f} ]" if n == 2 else f"I ≈ {h:.4f}/3 [ {y[0]:.{precision}f} + 4({' + '.join([f'{yi:.{precision}f}' for yi in impares])}) + 2({' + '.join([f'{yi:.{precision}f}' for yi in pares])}) + {y[-1]:.{precision}f} ]"
@@ -235,11 +303,13 @@ class IntegrationService:
         return {
             "metodo": "Simpson 1/3 Compuesto" if n > 2 else "Simpson 1/3 Simple", "a": a, "b": b, "n": n, "h": round(h, precision),
             "integral": round(float(integral), precision), "cota_error": cota_error,
+            "error_truncamiento": et_puntual["error_truncamiento"] if isinstance(et_puntual, dict) else et_puntual,
+            "detalle_error_truncamiento": et_puntual if isinstance(et_puntual, dict) else None,
             "tabla": tabla, "desarrollo": desarrollo, "notas": notas_unicas
         }
     
     @staticmethod
-    def simpson_38_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8) -> Dict:
+    def simpson_38_compuesto(f: Callable, a: float, b: float, n: int, precision: int = 8, epsilon: float = None) -> Dict:
         IntegrationService._validar_integral(f, a, b)
         if n % 3 != 0: raise ValueError("n debe ser multiplo de 3 para Simpson 3/8")
         
@@ -259,6 +329,7 @@ class IntegrationService:
         S = y[0] + y[-1] + 3 * (np.sum(grupo_1) + np.sum(grupo_2)) + 2 * np.sum(grupo_3)
         integral = (3 * h / 8) * S
         cota_error = IntegrationService._calcular_cota_error(f, a, b, n, "simpson38", precision)
+        et_puntual = IntegrationService._calcular_error_truncamiento_epsilon(f, a, b, n, "simpson38", epsilon, precision)
         
         tabla = [{"i": i, "x_n": round(float(x[i]), precision), "f_x_n": round(float(y[i]), precision)} for i in range(len(x))]
         if n == 3: desarrollo = f"I ≈ 3({h:.4f})/8 [ {y[0]:.{precision}f} + 3({y[1]:.{precision}f} + {y[2]:.{precision}f}) + {y[3]:.{precision}f} ]"
@@ -270,10 +341,12 @@ class IntegrationService:
         return {
             "metodo": "Simpson 3/8 Compuesto" if n > 3 else "Simpson 3/8 Simple", "a": a, "b": b, "n": n, "h": round(h, precision),
             "integral": round(float(integral), precision), "cota_error": cota_error,
+            "error_truncamiento": et_puntual["error_truncamiento"] if isinstance(et_puntual, dict) else et_puntual,
+            "detalle_error_truncamiento": et_puntual if isinstance(et_puntual, dict) else None,
             "tabla": tabla, "desarrollo": desarrollo, "notas": notas_unicas
         }
     @staticmethod
-    def comparar_metodos(func_str: str, a: float, b: float, n: int, precision: int = 8) -> Dict:
+    def comparar_metodos(func_str: str, a: float, b: float, n: int, precision: int = 8, epsilon: float = None) -> Dict:
         """
         Orquestador que ejecuta los 4 métodos de integración y devuelve un resumen comparativo.
         """
@@ -291,33 +364,33 @@ class IntegrationService:
 
         # 1. Rectángulo Medio Compuesto
         try:
-            resultados["rectangulo"] = IntegrationService.rectangulo_compuesto(f, a, b, n, precision)
+            resultados["rectangulo"] = IntegrationService.rectangulo_compuesto(f, a, b, n, precision, epsilon)
             resultados["rectangulo"]["exito"] = True
         except Exception as e:
             resultados["rectangulo"] = {"exito": False, "error_msg": str(e)}
 
         # 2. Trapecio Compuesto
         try:
-            resultados["trapecio"] = IntegrationService.trapecio_compuesto(f, a, b, n, precision)
+            resultados["trapecio"] = IntegrationService.trapecio_compuesto(f, a, b, n, precision, epsilon)
             resultados["trapecio"]["exito"] = True
         except Exception as e:
             resultados["trapecio"] = {"exito": False, "error_msg": str(e)}
 
         # 3. Simpson 1/3 Compuesto
         try:
-            resultados["simpson_13"] = IntegrationService.simpson_13_compuesto(f, a, b, n, precision)
+            resultados["simpson_13"] = IntegrationService.simpson_13_compuesto(f, a, b, n, precision, epsilon)
             resultados["simpson_13"]["exito"] = True
         except Exception as e:
             resultados["simpson_13"] = {"exito": False, "error_msg": str(e)}
 
         # 4. Simpson 3/8 Compuesto
         try:
-            resultados["simpson_38"] = IntegrationService.simpson_38_compuesto(f, a, b, n, precision)
+            resultados["simpson_38"] = IntegrationService.simpson_38_compuesto(f, a, b, n, precision, epsilon)
             resultados["simpson_38"]["exito"] = True
         except Exception as e:
             resultados["simpson_38"] = {"exito": False, "error_msg": str(e)}
 
         return {
-            "parametros": {"f(x)": func_str, "a": a, "b": b, "n": n},
+            "parametros": {"f(x)": func_str, "a": a, "b": b, "n": n, "epsilon": epsilon},
             "comparativa": resultados
         }

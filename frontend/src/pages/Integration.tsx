@@ -13,6 +13,7 @@ export default function Integration() {
     a: '0',
     b: '1',
     n: '4',
+    epsilon: '0.5',
     precision: '8'
   })
 
@@ -71,9 +72,13 @@ const handleClear = () => {
     try {
       const a_val = parseMathExpr(input.a)
       const b_val = parseMathExpr(input.b)
+      const epsilon_val = parseMathExpr(input.epsilon)
 
       if (isNaN(a_val) || isNaN(b_val)) {
         throw new Error("Los límites 'a' y 'b' contienen expresiones inválidas (Ej: use pi/2).")
+      }
+      if (isNaN(epsilon_val)) {
+        throw new Error("El valor de epsilon es inválido (Ej: 0.5, pi/4).")
       }
 
       // LÓGICA DE MÉTODOS SIMPLES vs COMPUESTOS
@@ -95,6 +100,7 @@ const handleClear = () => {
         a: a_val,
         b: b_val,
         n: n_final,
+        epsilon: epsilon_val,
         precision: parseInt(input.precision)
       }
 
@@ -298,6 +304,12 @@ const theories: Record<string, any> = {
               <input type="number" min="1" max="15" value={input.precision} onChange={(e) => setInput({...input, precision: e.target.value})} />
             </div>
 
+            <div className="form-group">
+              <label>Punto epsilon (ε):</label>
+              <input type="text" value={input.epsilon} onChange={(e) => setInput({...input, epsilon: e.target.value})} />
+              <small>Debe pertenecer al intervalo [a, b]</small>
+            </div>
+
             <button type="submit" disabled={loading} className="btn-primary">
               {loading ? 'Calculando...' : 'Aproximar Integral'}
             </button>
@@ -412,10 +424,24 @@ const theories: Record<string, any> = {
                     <p><strong>Aproximación (I):</strong> {result.integral ?? result.resultado}</p>
                     {result.h !== undefined && <p><strong>Paso (h):</strong> {result.h}</p>}
                     
-                    {(result.cota_error !== undefined || result.error_truncamiento !== undefined) && (
+                    {result.cota_error !== undefined && (
                       <p style={{ marginTop: '8px', color: '#800000', fontWeight: 'bold' }}>
-                        Cota de Error de Truncamiento Maximo (E_t) ≤ {result.cota_error ?? result.error_truncamiento}
+                        Cota de Error de Truncamiento Máximo (|E_t|) ≤ {result.cota_error}
                       </p>
+                    )}
+
+                    {result.error_truncamiento !== undefined && (
+                      <p style={{ marginTop: '8px', color: '#2f4f4f', fontWeight: 'bold' }}>
+                        Error de Truncamiento en ε: E_t(ε) = {result.error_truncamiento}
+                      </p>
+                    )}
+
+                    {result.detalle_error_truncamiento && (
+                      <div style={{ marginTop: '6px', fontSize: '13px', color: '#1f1f1f' }}>
+                        <p><strong>ε:</strong> {result.detalle_error_truncamiento.epsilon}</p>
+                        <p><strong>Orden derivada requerida:</strong> {result.detalle_error_truncamiento.orden_derivada}</p>
+                        <p><strong>f^(n)(ε):</strong> {result.detalle_error_truncamiento.derivada_en_epsilon}</p>
+                      </div>
                     )}
                   </div>
                 </div>

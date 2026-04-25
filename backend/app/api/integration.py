@@ -13,6 +13,7 @@ class IntegrationRequest(BaseModel):
     a: Optional[float] = None
     b: Optional[float] = None
     n: Optional[int] = None
+    epsilon: Optional[float] = None
     precision: Optional[int] = 8
     
     class Config:
@@ -27,7 +28,7 @@ def rectangulo_compuesto(req: IntegrationRequest):
         f = IntegrationService.compilar_funcion(req.func_str)
         precision = req.precision or 8
         resultado = IntegrationService.rectangulo_compuesto(
-            f, req.a, req.b, req.n, precision
+            f, req.a, req.b, req.n, precision, req.epsilon
         )
         return resultado
     except Exception as e:
@@ -42,7 +43,7 @@ def trapecio_compuesto(req: IntegrationRequest):
         f = IntegrationService.compilar_funcion(req.func_str)
         precision = req.precision or 8
         resultado = IntegrationService.trapecio_compuesto(
-            f, req.a, req.b, req.n, precision
+            f, req.a, req.b, req.n, precision, req.epsilon
         )
         return resultado
     except Exception as e:
@@ -59,7 +60,7 @@ def simpson_13_compuesto(req: IntegrationRequest):
         f = IntegrationService.compilar_funcion(req.func_str)
         precision = req.precision or 8
         resultado = IntegrationService.simpson_13_compuesto(
-            f, req.a, req.b, req.n, precision
+            f, req.a, req.b, req.n, precision, req.epsilon
         )
         return resultado
     except Exception as e:
@@ -76,7 +77,7 @@ def simpson_38_compuesto(req: IntegrationRequest):
         f = IntegrationService.compilar_funcion(req.func_str)
         precision = req.precision or 8
         resultado = IntegrationService.simpson_38_compuesto(
-            f, req.a, req.b, req.n, precision
+            f, req.a, req.b, req.n, precision, req.epsilon
         )
         return resultado
     except Exception as e:
@@ -95,7 +96,8 @@ def comparar_integraciones(req: IntegrationRequest):
             a=req.a,
             b=req.b,
             n=req.n,
-            precision=precision
+            precision=precision,
+            epsilon=req.epsilon
         )
         
         if "error_global" in resultado:

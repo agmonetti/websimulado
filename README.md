@@ -66,24 +66,8 @@ pytest
 ```
 
 ## To DO
-- terminar de corroborar todos los metodos
-- revisar la teoria de los metodos
-- agregar calculo de ET de los metodos que lo tienen, pero para calcularlo necesitan el simbolo raro de e/E.
-```bash
-import sympy as sp
- 
-def derivada_n_valor(f, x, n, a):
-    return float(sp.diff(f, x, n).subs(x, a))
- 
- 
-# Ejemplo
-x = sp.symbols('x')
-f = (1 / sp.sqrt(2)) * x**(2*x)
- 
-#print(derivada_n_valor(f -> funcion, x -> variable, 5 -> orden de la derivada, 0 -> punto en el que se evalua))
 
-print(derivada_n_valor(f, x, 4, 0.5))
-```
+- ~agregar calculo de ET de los metodos que lo tienen, pero para calcularlo necesitan el simbolo raro de e/E. ~ agregado, validar cuando tenga foto del parcial!
 
 - agregar calculo de media muestral a la seccion de resultados de montecarlo
 

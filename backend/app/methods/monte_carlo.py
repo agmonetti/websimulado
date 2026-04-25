@@ -67,6 +67,9 @@ class MonteCarloService:
         if np.sum(exitos_neg) > np.sum(exitos_pos):
             integral_aprox = -integral_aprox
 
+        # Para hit-or-miss, la media muestral natural es la media del indicador de éxito.
+        media_muestral = p_exito
+
         # Cálculo Estadístico para Hit-or-Miss (Distribución Binomial)
         desv_std = np.sqrt(p_exito * (1 - p_exito)) if N > 1 else 0
         error_est = desv_std / np.sqrt(N) if N > 0 else 0
@@ -86,6 +89,7 @@ class MonteCarloService:
         return {
             "metodo": "Hit-or-Miss 1D",
             "integral": round(float(integral_aprox), precision),
+            "media_muestral": round(float(media_muestral), precision),
             "N": N,
             "area_caja": round(float(area_caja), precision),
             "n_exitos": n_exitos,
@@ -160,6 +164,7 @@ class MonteCarloService:
         
         return {
             "metodo": "Valor Promedio 1D", "integral": round(float(integral), precision),
+            "media_muestral": round(float(promedio), precision),
             "promedio_fx": round(float(promedio), precision), "escala": round(float(escala), precision),
             "desv_estandar": round(float(desv_std), precision), "error_std": round(float(error_est), precision),
             "z_score": round(float(z_score), 4), "ic_inf": round(float(ic_inf), precision),
@@ -195,6 +200,7 @@ class MonteCarloService:
         
         return {
             "metodo": "Valor Promedio 2D", "integral": round(float(integral), precision),
+            "media_muestral": round(float(promedio), precision),
             "promedio_fxy": round(float(promedio), precision), "escala": round(float(escala), precision),
             "desv_estandar": round(float(desv_std), precision), "error_std": round(float(error_est), precision),
             "z_score": round(float(z_score), 4), "ic_inf": round(float(ic_inf), precision),
@@ -230,6 +236,7 @@ class MonteCarloService:
         
         return {
             "metodo": "Valor Promedio 3D", "integral": round(float(integral), precision),
+            "media_muestral": round(float(promedio), precision),
             "promedio_fxyz": round(float(promedio), precision), "escala": round(float(escala), precision),
             "desv_estandar": round(float(desv_std), precision), "error_std": round(float(error_est), precision),
             "z_score": round(float(z_score), 4), "ic_inf": round(float(ic_inf), precision),

@@ -205,6 +205,8 @@ export default function MonteCarlo() {
       const error_std = result.error_std || 0;
       const escala = result.escala || 1; 
       const margen_error = z_score * error_std * escala;
+      const mediaMuestral =
+        result.media_muestral ?? result.promedio_fx ?? result.promedio_fxy ?? result.promedio_fxyz ?? '-';
       
       let validacion_texto = "";
       if (input.max_error.trim() !== "") {
@@ -237,6 +239,7 @@ export default function MonteCarlo() {
 ╚═══════════════════════════════════╝
 ${encabezado_escala}
 Î (Integral)  = ${result.integral}
+x̄ (Media Muestral) = ${mediaMuestral}
 G (Desv. Std) = ${result.desv_estandar}
 EE (Err. Std) = ${result.error_std}
 Z(α/2)        = ${result.z_score}
