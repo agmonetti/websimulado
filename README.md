@@ -67,8 +67,8 @@ pytest
 
 ## To DO
 
-- mejorar el apartado de 'Analisis de estabilidad'
-- el analisis avanzado de geogebra deberia mostrar justamente debajo de dicho boton como fluctua el grafico para una mejor comprension.
+- ~mejorar el apartado de 'Analisis de estabilidad'~
+- ~el analisis avanzado de geogebra deberia mostrar justamente debajo de dicho boton como fluctua el grafico para una mejor comprension.~
 
 - ~agregar calculo de ET de los metodos que lo tienen, pero para calcularlo necesitan el simbolo raro de e/E. ~ agregado, validar cuando tenga foto del parcial!
 
