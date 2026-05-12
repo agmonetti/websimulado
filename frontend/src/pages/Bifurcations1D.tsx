@@ -848,11 +848,11 @@ export default function Bifurcations1D() {
             </div>
           )}
 
-          {bifResult?.exact_analysis && (
+          {bifResult && (
             <div className="result-box" style={{ marginTop: '10px' }}>
               <div className="validation-title">Resultados del ejercicio</div>
               <div style={{ fontSize: '13px', display: 'grid', gap: '6px' }}>
-                {bifResult.exact_analysis.roots && bifResult.exact_analysis.roots.length > 0 && (
+                {bifResult.exact_analysis?.roots && bifResult.exact_analysis.roots.length > 0 ? (
                   <div>
                     <strong>Puntos de equilibrio:</strong>
                     <div style={{ marginTop: '4px' }}>
@@ -864,11 +864,24 @@ export default function Bifurcations1D() {
                       ))}
                     </div>
                   </div>
+                ) : liveSnapshot?.equilibria?.length ? (
+                  <div>
+                    <strong>Puntos de equilibrio (numerico):</strong>
+                    <div style={{ marginTop: '4px' }}>
+                      {liveSnapshot.equilibria.map((eq, idx) => (
+                        <div key={`root-num-${idx}`}>
+                          x* = {formatNumber(eq.x, 6)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div>No se detectaron puntos de equilibrio en el rango.</div>
                 )}
 
-                {bifResult.exact_analysis.roots && bifResult.exact_analysis.roots.length > 0 && (
+                {bifResult.exact_analysis?.roots && bifResult.exact_analysis.roots.length > 0 && (
                   <div>
-                    <strong>Condicion de existencia:</strong>
+                    <strong>Condicion de existencia (por raiz):</strong>
                     <div style={{ marginTop: '4px' }}>
                       {bifResult.exact_analysis.roots.map((item, idx) => (
                         <div key={`exist-${idx}`}>
@@ -893,30 +906,41 @@ export default function Bifurcations1D() {
                   </div>
                 )}
 
-                {bifResult.exact_analysis.stability && bifResult.exact_analysis.stability.length > 0 && (
+                {bifResult.exact_analysis?.existence ? (
+                  (() => {
+                    const roots = bifResult.exact_analysis?.roots || []
+                    const hasConditional = roots.some((item) => item.existence && item.existence !== 'siempre')
+                    return (
+                      <div>
+                        <strong>Condicion de existencia (global):</strong>
+                        <div style={{ marginTop: '4px' }}>
+                          {bifResult.exact_analysis.existence === 'siempre' ? (
+                            <span>{hasConditional ? 'al menos un equilibrio siempre existe' : 'siempre existe'}</span>
+                          ) : (
+                            <FormulaDisplay inline formula={formatToLatex(bifResult.exact_analysis.existence)} />
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()
+                ) : advancedSummary?.existenceStart !== null ? (
+                  <div>
+                    <strong>Condicion de existencia (aprox.):</strong>
+                    <div style={{ marginTop: '4px' }}>
+                      {bifParam} {'>='} {formatNumber(advancedSummary.existenceStart, 6)}
+                      {advancedSummary.existenceEnd !== null ? (
+                        <> y {bifParam} {'<='} {formatNumber(advancedSummary.existenceEnd, 6)}</>
+                      ) : null}
+                    </div>
+                  </div>
+                ) : null}
+
+                {bifResult.exact_analysis?.stability && bifResult.exact_analysis.stability.length > 0 ? (
                   <div>
                     <strong>Analisis de estabilidad:</strong>
                     <div style={{ marginTop: '4px' }}>
                       {bifResult.exact_analysis.stability.map((item, idx) => (
                         <div key={`stab-${idx}`}>
-                          {(() => {
-                            const stableCond = simplifyCondition(item.stable_when)
-                            const unstableCond = simplifyCondition(item.unstable_when)
-                            let conclusion = 'Depende de r'
-                            if (stableCond === 'siempre' || unstableCond === 'nunca') {
-                              conclusion = 'Estable'
-                            } else if (unstableCond === 'siempre' || stableCond === 'nunca') {
-                              conclusion = 'Inestable'
-                            }
-                            return (
-                              <div style={{ marginBottom: '4px' }}>
-                                <strong>Conclusion: </strong>
-                                <span style={{ color: conclusion === 'Estable' ? '#1b8f3a' : conclusion === 'Inestable' ? '#c62828' : '#6d6d6d' }}>
-                                  {conclusion}
-                                </span>
-                              </div>
-                            )
-                          })()}
                           <div>
                             <span>Para x* = </span>
                             <FormulaDisplay inline formula={formatToLatex(item.root)} />
@@ -949,7 +973,18 @@ export default function Bifurcations1D() {
                       ))}
                     </div>
                   </div>
-                )}
+                ) : liveSnapshot?.equilibria?.length ? (
+                  <div>
+                    <strong>Analisis de estabilidad (numerico):</strong>
+                    <div style={{ marginTop: '4px' }}>
+                      {liveSnapshot.equilibria.map((eq, idx) => (
+                        <div key={`stab-num-${idx}`}>
+                          x* = {formatNumber(eq.x, 6)} | f'(x*) = {formatNumber(eq.fprime, 6)} | {eq.stability}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           )}

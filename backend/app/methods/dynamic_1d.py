@@ -77,6 +77,13 @@ class Dynamic1DService:
             exp = pow_expr.exp
             if exp.is_Rational and exp.q % 2 == 0:
                 conditions.append(sp.Ge(sp.simplify(pow_expr.base), 0))
+        for log_expr in expr.atoms(sp.log):
+            if log_expr.args:
+                arg = sp.simplify(log_expr.args[0])
+                if arg.has(sp.Abs):
+                    conditions.append(sp.Ne(arg, 0))
+                else:
+                    conditions.append(sp.Gt(arg, 0))
         return conditions
 
     @staticmethod
@@ -87,11 +94,29 @@ class Dynamic1DService:
         expr_simplified = sp.simplify(expr)
         deriv_expr = sp.diff(expr_simplified, x)
 
+        def extract_finite_roots(roots_set: sp.Set) -> List[sp.Expr] | None:
+            if isinstance(roots_set, sp.FiniteSet):
+                return list(roots_set)
+            if isinstance(roots_set, sp.Intersection):
+                for arg in roots_set.args:
+                    extracted = extract_finite_roots(arg)
+                    if extracted is not None:
+                        return extracted
+                return None
+            if isinstance(roots_set, sp.Union):
+                combined: List[sp.Expr] = []
+                for arg in roots_set.args:
+                    extracted = extract_finite_roots(arg)
+                    if extracted is None:
+                        return None
+                    combined.extend(extracted)
+                return combined
+            return None
+
         try:
             roots_set = sp.solveset(sp.Eq(expr_simplified, 0), x, domain=sp.S.Reals)
-            if isinstance(roots_set, sp.FiniteSet):
-                roots = list(roots_set)
-            else:
+            roots = extract_finite_roots(roots_set)
+            if roots is None:
                 raise ValueError('Soluciones no finitas o no reales')
         except Exception:
             roots = []
