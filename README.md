@@ -55,7 +55,12 @@ docker-compose up
 
 - Ecuaciones Diferenciales Ordinarias (EDO): Método de Euler, Euler Mejorado (Heun) y Runge-Kutta de 4to Orden (RK4), con comparación contra solución exacta y error por paso.
 
+- Dinámica 1D: Modelos Malthus, Verhulst (con control), Newton y personalizado, con equilibrios, diagrama de fase y evolución temporal.
+
+- Bifurcaciones 1D: Saddle-Node, Pitchfork, Transcritical (con variantes) y personalizado, con diagrama de bifurcación y análisis de estabilidad.
+
 - Simulación Monte Carlo: Hit-or-Miss (1D), Valor Promedio (1D, 2D, 3D), Análisis Estadístico con Intervalos de Confianza y Factor de Reducción de Varianza.
+
 ---
 
 ## tests
